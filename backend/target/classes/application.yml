@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: second-life-backend
+  datasource:
+    url: jdbc:mysql://mysql-26534f31-vku-9ad2.i.aivencloud.com:15113/defaultdb?ssl-mode=REQUIRED
+    username: avnadmin
+    password: AVNS_dR2oCsxQfO_SQQwGPsH
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
