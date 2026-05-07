@@ -13,6 +13,7 @@ import ProductDetail from "@/pages/product-detail";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Orders from "@/pages/orders";
+import AddressPage from "@/pages/address";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
@@ -75,6 +76,11 @@ function Router() {
             <Route path="/thanh-toan">
               <ProtectedRoute allowedRoles={["USER", "SELLER"]}>
                 <Checkout />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/dia-chi">
+              <ProtectedRoute allowedRoles={["USER", "SELLER"]}>
+                <AddressPage />
               </ProtectedRoute>
             </Route>
             <Route path="/don-hang">

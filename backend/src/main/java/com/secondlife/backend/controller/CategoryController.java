@@ -1,7 +1,6 @@
 package com.secondlife.backend.controller;
 
 import com.secondlife.backend.domain.dto.category.CategoryResponse;
-import com.secondlife.backend.domain.model.Category;
 import com.secondlife.backend.repository.CategoryRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

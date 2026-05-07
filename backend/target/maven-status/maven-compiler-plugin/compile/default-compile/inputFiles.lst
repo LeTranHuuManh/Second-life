@@ -13,6 +13,7 @@
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/HealthController.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/ProductController.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/SellerRegistrationController.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/UserAddressController.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/auth/AuthController.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/test/TestController.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/controller/user/AdminUserController.java
@@ -50,7 +51,10 @@
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/domain/model/SellerRegistration.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/domain/model/TransactionRecord.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/domain/model/UserAccount.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/domain/model/UserAddress.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/domain/model/UserProfile.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/dto/address/AddressRequest.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/dto/address/AddressResponse.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/dto/auth/AuthResponse.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/dto/auth/LoginRequest.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/dto/auth/RegisterRequest.java
@@ -60,6 +64,7 @@
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/repository/RefreshTokenRepository.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/repository/SellerRegistrationRepository.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/repository/UserAccountRepository.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/repository/UserAddressRepository.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/repository/UserRepository.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/security/annotation/RequireRole.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/security/aspect/RoleCheckAspect.java
@@ -69,8 +74,10 @@
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/CloudinaryService.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/ProductService.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/ShopService.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/UserAddressService.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/admin/AdminUserService.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/auth/AuthService.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/auth/RefreshTokenService.java
+/Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/impl/UserAddressServiceImpl.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/seller/SellerDashboardService.java
 /Users/macbook/Documents/Second-Life/backend/src/main/java/com/secondlife/backend/service/seller/SellerRegistrationService.java

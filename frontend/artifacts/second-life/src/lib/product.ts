@@ -43,21 +43,6 @@ export const uploadProductImages = async (
   });
 };
 
-export interface CategoryData {
-  id: number;
-  name: string;
-  icon?: string;
-  parentId?: number;
-}
-
-/**
- * Lấy danh sách danh mục (categories) từ Backend
- */
-export const getCategories = async (): Promise<CategoryData[]> => {
-  return await apiFetch("/categories", {
-    method: "GET",
-  });
-};
 
 export interface ProductsPageData {
   content: any[];

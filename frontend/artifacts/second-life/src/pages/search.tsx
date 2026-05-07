@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { useProducts, ListingType, SortOption } from "@/hooks/use-products";
-import { MOCK_CATEGORIES, VIETNAMESE_PROVINCES } from "@/lib/mock-data";
+import { VIETNAMESE_PROVINCES } from "@/lib/mock-data";
+import { getCategories, CategoryData } from "@/hooks/use-categories";
+import { CategoryIcon } from "@/components/category-icon";
 import { useCart } from "@/lib/context";
 import { formatPrice } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
@@ -109,7 +111,9 @@ function SearchProductCard({ product }: { product: Product }) {
           <div className="space-y-1">
             {product.buyPrice && (
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-muted-foreground shrink-0">Mua:</span>
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  Mua:
+                </span>
                 <span className="text-sm font-bold text-foreground">
                   {formatPrice(product.buyPrice)}
                 </span>
@@ -117,10 +121,14 @@ function SearchProductCard({ product }: { product: Product }) {
             )}
             {product.rentPricePerDay && (
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-muted-foreground shrink-0">Thuê:</span>
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  Thuê:
+                </span>
                 <span className="text-sm font-bold text-primary">
                   {formatPrice(product.rentPricePerDay)}
-                  <span className="text-[10px] text-muted-foreground font-normal">/ngày</span>
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    /ngày
+                  </span>
                 </span>
               </div>
             )}
@@ -135,7 +143,9 @@ function SearchProductCard({ product }: { product: Product }) {
             <div className="flex items-center gap-0.5 text-amber-500 font-medium">
               <Star className="w-2.5 h-2.5 fill-amber-500" />
               {product.rating}
-              <span className="text-muted-foreground font-normal">({product.reviewsCount})</span>
+              <span className="text-muted-foreground font-normal">
+                ({product.reviewsCount})
+              </span>
             </div>
           </div>
 
@@ -184,7 +194,7 @@ function Pagination({
 
   const all = Array.from({ length: total }, (_, i) => i + 1);
   const visible = all.filter(
-    (p) => p === 1 || p === total || Math.abs(p - current) <= 1
+    (p) => p === 1 || p === total || Math.abs(p - current) <= 1,
   );
 
   return (
@@ -245,6 +255,7 @@ interface FilterProps {
   setSort: (v: SortOption) => void;
   category: string;
   setCategory: (v: string) => void;
+  categories: CategoryData[];
   onClear: () => void;
   hasActive: boolean;
 }
@@ -261,6 +272,7 @@ function FilterSidebar({
   setSort,
   category,
   setCategory,
+  categories,
   onClear,
   hasActive,
 }: FilterProps) {
@@ -279,7 +291,11 @@ function FilterSidebar({
             onChange={(e) => setSearchInput(e.target.value)}
             className="rounded-xl text-sm h-9 flex-1"
           />
-          <Button type="submit" size="sm" className="rounded-xl h-9 px-3 shrink-0">
+          <Button
+            type="submit"
+            size="sm"
+            className="rounded-xl h-9 px-3 shrink-0"
+          >
             <SearchIcon className="w-3.5 h-3.5" />
           </Button>
         </form>
@@ -368,7 +384,7 @@ function FilterSidebar({
           >
             Tất cả danh mục
           </button>
-          {MOCK_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setCategory(cat.name)}
@@ -378,8 +394,8 @@ function FilterSidebar({
                   : "hover:bg-secondary text-muted-foreground hover:text-foreground"
               }`}
             >
-              <span className="text-base leading-none">{cat.icon}</span>
-              {cat.name}
+              <CategoryIcon iconName={cat.icon} className="w-4 h-4" />
+              <span className="truncate">{cat.name}</span>
             </button>
           ))}
         </div>
@@ -420,6 +436,11 @@ export default function Search() {
   const [sort, setSort] = useState<SortOption>("default");
   const [page, setPage] = useState(1);
   const [mobileSidebar, setMobileSidebar] = useState(false);
+  const [categories, setCategories] = React.useState<CategoryData[]>([]);
+
+  React.useEffect(() => {
+    getCategories().then(setCategories).catch(console.error);
+  }, []);
 
   const { data: products, isLoading } = useProducts({
     listing_type: listingType,
@@ -471,7 +492,11 @@ export default function Search() {
   };
 
   const hasActive =
-    !!query || !!category || !!province || sort !== "default" || listingType !== "all";
+    !!query ||
+    !!category ||
+    !!province ||
+    sort !== "default" ||
+    listingType !== "all";
 
   // Client-side pagination
   const totalPages = Math.ceil((products?.length ?? 0) / PAGE_SIZE);
@@ -497,6 +522,7 @@ export default function Search() {
     setSort: handleSort,
     category,
     setCategory: handleCategory,
+    categories,
     onClear: clearAll,
     hasActive,
   };
@@ -505,7 +531,6 @@ export default function Search() {
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex gap-7 items-start">
-
           {/* ── Desktop sidebar ─────────────────────────────────── */}
           <aside className="hidden lg:block w-64 shrink-0 bg-white border border-border/60 rounded-2xl p-5 shadow-sm sticky top-24 self-start">
             <FilterSidebar {...filterProps} />
@@ -513,7 +538,6 @@ export default function Search() {
 
           {/* ── Main content ─────────────────────────────────────── */}
           <div className="flex-1 min-w-0">
-
             {/* Top bar */}
             <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
               <div>
@@ -555,41 +579,83 @@ export default function Search() {
             {hasActive && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {query && (
-                  <Badge variant="secondary" className="rounded-full gap-1 pl-3 pr-2 py-1">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full gap-1 pl-3 pr-2 py-1"
+                  >
                     🔍 {query}
-                    <button onClick={() => { setQuery(""); setSearchInput(""); }} className="ml-0.5 hover:text-destructive">
+                    <button
+                      onClick={() => {
+                        setQuery("");
+                        setSearchInput("");
+                      }}
+                      className="ml-0.5 hover:text-destructive"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
                 )}
                 {listingType !== "all" && (
-                  <Badge variant="secondary" className="rounded-full gap-1 pl-3 pr-2 py-1">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full gap-1 pl-3 pr-2 py-1"
+                  >
                     {LISTING_TYPES.find((l) => l.value === listingType)?.label}
-                    <button onClick={() => setListingType("all")} className="ml-0.5 hover:text-destructive">
+                    <button
+                      onClick={() => setListingType("all")}
+                      className="ml-0.5 hover:text-destructive"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
                 )}
                 {category && (
-                  <Badge variant="secondary" className="rounded-full gap-1 pl-3 pr-2 py-1">
-                    {MOCK_CATEGORIES.find((c) => c.name === category)?.icon} {category}
-                    <button onClick={() => setCategory("")} className="ml-0.5 hover:text-destructive">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full gap-1 pl-3 pr-2 py-1"
+                  >
+                    <CategoryIcon
+                      iconName={
+                        categories.find((c) => c.name === category)?.icon
+                      }
+                      className="w-3 h-3 mr-1"
+                    />
+                    {category}
+                    <button
+                      onClick={() => setCategory("")}
+                      className="ml-0.5 hover:text-destructive"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
                 )}
                 {province && (
-                  <Badge variant="secondary" className="rounded-full gap-1 pl-3 pr-2 py-1">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full gap-1 pl-3 pr-2 py-1"
+                  >
                     📍 {province}
-                    <button onClick={() => { setProvince(""); setDistrict(""); }} className="ml-0.5 hover:text-destructive">
+                    <button
+                      onClick={() => {
+                        setProvince("");
+                        setDistrict("");
+                      }}
+                      className="ml-0.5 hover:text-destructive"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
                 )}
                 {sort !== "default" && (
-                  <Badge variant="secondary" className="rounded-full gap-1 pl-3 pr-2 py-1">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full gap-1 pl-3 pr-2 py-1"
+                  >
                     {SORT_OPTIONS.find((s) => s.value === sort)?.label}
-                    <button onClick={() => setSort("default")} className="ml-0.5 hover:text-destructive">
+                    <button
+                      onClick={() => setSort("default")}
+                      className="ml-0.5 hover:text-destructive"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
@@ -643,7 +709,8 @@ export default function Search() {
                   Không tìm thấy sản phẩm nào
                 </h3>
                 <p className="text-muted-foreground text-sm max-w-sm">
-                  Hãy thử đổi từ khóa hoặc điều chỉnh bộ lọc để tìm được sản phẩm ưng ý.
+                  Hãy thử đổi từ khóa hoặc điều chỉnh bộ lọc để tìm được sản
+                  phẩm ưng ý.
                 </p>
                 <Button
                   variant="outline"

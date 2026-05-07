@@ -4,7 +4,7 @@ import { useAuth, useCart } from "@/lib/context";
 import {
   Search,
   ShoppingCart,
-  User,
+  MapPin,
   Bell,
   MessageCircle,
   Menu,
@@ -140,6 +140,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   >
                     <Link href="/don-hang" className="flex items-center w-full">
                       <Package className="mr-2 h-4 w-4" /> Đơn hàng của tôi
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-xl cursor-pointer py-2.5"
+                  >
+                    <Link href="/dia-chi" className="flex items-center w-full">
+                      <MapPin className="mr-2 h-4 w-4" /> Địa chỉ của tôi
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem

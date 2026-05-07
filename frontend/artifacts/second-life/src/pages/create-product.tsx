@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import {
-  createProduct,
-  uploadProductImages,
-  getCategories,
-  CategoryData,
-} from "@/lib/product";
+import { createProduct, uploadProductImages } from "@/lib/product";
+import { getCategories, CategoryData } from "@/hooks/use-categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
