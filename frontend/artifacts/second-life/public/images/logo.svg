@@ -1,0 +1,15 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Infinity / lemniscate loop - stroke based, rounded caps -->
+  <path d="M100,102
+           C96,74 126,52 152,67
+           C178,82 178,122 152,137
+           C126,152 96,130 100,102
+           C104,74 74,52 48,67
+           C22,82 22,122 48,137
+           C74,152 104,130 100,102Z"
+        stroke="#22863A" stroke-width="13"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Small accent dot — upper right of loop -->
+  <circle cx="157" cy="63" r="9" fill="#22863A"/>
+</svg>

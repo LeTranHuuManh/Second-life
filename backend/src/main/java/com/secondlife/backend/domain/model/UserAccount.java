@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.secondlife.backend.domain.enums.UserRole;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,6 +29,9 @@ public class UserAccount extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private UserRole role = UserRole.USER;
@@ -35,7 +39,7 @@ public class UserAccount extends BaseEntity {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
 
     @OneToMany(mappedBy = "seller")
@@ -61,6 +65,14 @@ public class UserAccount extends BaseEntity {
         return id;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public UserRole getRole() {
         return role;
     }
@@ -79,6 +91,10 @@ public class UserAccount extends BaseEntity {
 
     public UserProfile getProfile() {
         return profile;
+    }
+
+    public void setProfile(UserProfile profile) {
+        this.profile = profile;
     }
 
     public Set<Product> getPostedProducts() {

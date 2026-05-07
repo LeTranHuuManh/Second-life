@@ -1,0 +1,17 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="38" fill="#F0FFF4"/>
+
+  <!-- Infinity loop -->
+  <path d="M90,92
+           C86,67 113,47 136,61
+           C159,75 159,109 136,123
+           C113,137 86,117 90,92
+           C94,67 67,47 44,61
+           C21,75 21,109 44,123
+           C67,137 94,117 90,92Z"
+        stroke="#22863A" stroke-width="12"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Accent dot -->
+  <circle cx="141" cy="57" r="8.5" fill="#22863A"/>
+</svg>

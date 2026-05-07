@@ -25,6 +25,9 @@ public class Category extends BaseEntity {
     @Column(name = "name", nullable = false, length = 120)
     private String name;
 
+    @Column(name = "icon", length = 50)
+    private String icon;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
@@ -45,6 +48,14 @@ public class Category extends BaseEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     public Category getParentCategory() {

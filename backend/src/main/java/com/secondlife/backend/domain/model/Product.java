@@ -59,7 +59,7 @@ public class Product extends BaseEntity {
     @Column(name = "location", length = 255)
     private String location;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url", nullable = false, length = 1000)
     @OrderColumn(name = "position_no")
@@ -68,6 +68,10 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private ProductStatus status = ProductStatus.AVAILABLE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "listing_type", length = 30)
+    private com.secondlife.backend.domain.enums.ListingType listingType;
 
     @OneToMany(mappedBy = "product")
     private Set<AiSuggestion> aiSuggestions = new HashSet<>();
@@ -162,6 +166,14 @@ public class Product extends BaseEntity {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public com.secondlife.backend.domain.enums.ListingType getListingType() {
+        return listingType;
+    }
+
+    public void setListingType(com.secondlife.backend.domain.enums.ListingType listingType) {
+        this.listingType = listingType;
     }
 
     public Set<AiSuggestion> getAiSuggestions() {

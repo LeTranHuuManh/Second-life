@@ -49,6 +49,10 @@ public class UserProfile extends BaseEntity {
         return userId;
     }
 
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public UserAccount getUser() {
         return user;
     }

@@ -1,6 +1,10 @@
 spring:
   application:
     name: second-life-backend
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
   datasource:
     url: jdbc:mysql://mysql-26534f31-vku-9ad2.i.aivencloud.com:15113/defaultdb?ssl-mode=REQUIRED
     username: avnadmin
@@ -17,9 +21,20 @@ spring:
 
 server:
   port: 8080
+  servlet:
+    context-path: /
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+jwt:
+  secret: your-secret-key-that-should-be-at-least-256-bits-long-for-hs256-algorithm-please-change-this-in-production
+  expiration: 86400000
+
+cloudinary:
+  cloud-name: dbn2hhrqo
+  api-key: 834377596241268
+  api-secret: 7o3Quh1Poy1rTlrGIkFxvUmJv10

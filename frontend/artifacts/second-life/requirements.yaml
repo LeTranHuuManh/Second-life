@@ -1,0 +1,29 @@
+packages:
+  "framer-motion": "For smooth page transitions and micro-interactions"
+  "recharts": "For the seller dashboard revenue charts"
+  "date-fns": "For date formatting and rental duration calculations"
+  "embla-carousel-react": "For product image galleries and horizontal sliders"
+  "lucide-react": "Icons"
+  "clsx": "Utility for Tailwind classes"
+  "tailwind-merge": "Utility for Tailwind classes"
+  "@hookform/resolvers": "For Zod form validation"
+  "react-hook-form": "For robust forms"
+  "zod": "Schema validation"
+
+images:
+  - path: "artifacts/second-life/public/images/logo.png"
+    description: "A cute, minimal logo for a marketplace called 'Second Life'. It features a soft pastel green leaf intertwined with an infinity loop on a transparent background."
+    aspect_ratio: "1:1"
+  - path: "artifacts/second-life/public/images/hero-banner.png"
+    description: "A beautiful, soft pastel green gradient background with 3D cute illustration of shopping bags, plants, and a happy smiling box character, friendly and welcoming."
+    aspect_ratio: "16:9"
+  - path: "artifacts/second-life/public/images/empty-cart.png"
+    description: "A cute, stylized illustration of a sad pastel green shopping bag looking empty, clean modern vector style, isolated."
+    aspect_ratio: "1:1"
+  - path: "artifacts/second-life/public/images/empty-search.png"
+    description: "A cute pastel potted plant looking through a magnifying glass, modern clean vector illustration."
+    aspect_ratio: "1:1"
+
+notes:
+  - All API calls are simulated using TanStack Query and in-memory mock data.
+  - Authentication is mocked entirely on the client side using React Context.

@@ -1,4 +1,4 @@
-# [cite_start]Second Life – Nền tảng Marketplace mua bán & cho thuê đồ cũ tích hợp AI định giá [cite: 3]
+pnpm run dev --filter "@workspace/second-life"# [cite_start]Second Life – Nền tảng Marketplace mua bán & cho thuê đồ cũ tích hợp AI định giá [cite: 3]
 
 ## 📖 Giới thiệu dự án
 
@@ -92,6 +92,9 @@ second-life-project/
 │
 └── README.md
 ```
+
 # Second-life
+
 # Second-life
+
 # Second-life
