@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   useAddresses,
   useCreateAddress,
+  useUpdateAddress,
   useDeleteAddress,
   useSetDefaultAddress,
 } from "@/hooks/use-addresses";

@@ -58,6 +58,31 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     @Transactional
+    public AddressResponse updateAddress(Long userId, Long addressId, AddressRequest request) {
+        UserAddress address = userAddressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+
+        if (!address.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (request.getIsDefault() != null && request.getIsDefault() && !address.getIsDefault()) {
+            resetDefaultAddresses(userId);
+        }
+
+        address.setName(request.getName());
+        address.setPhoneNumber(request.getPhoneNumber());
+        address.setAddress(request.getAddress());
+        
+        if (request.getIsDefault() != null) {
+            address.setIsDefault(request.getIsDefault());
+        }
+
+        return mapToResponse(userAddressRepository.save(address));
+    }
+
+    @Override
+    @Transactional
     public AddressResponse setDefaultAddress(Long userId, Long addressId) {
         UserAddress address = userAddressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));

@@ -34,6 +34,13 @@ public class UserAddressController {
         return ResponseEntity.ok(BaseResponse.success(userAddressService.addAddress(getCurrentUserId(), request)));
     }
 
+    @PutMapping("/{addressId}")
+    public ResponseEntity<BaseResponse<AddressResponse>> updateAddress(
+            @PathVariable Long addressId,
+            @Valid @RequestBody AddressRequest request) {
+        return ResponseEntity.ok(BaseResponse.success(userAddressService.updateAddress(getCurrentUserId(), addressId, request)));
+    }
+
     @PutMapping("/{addressId}/default")
     public ResponseEntity<BaseResponse<AddressResponse>> setDefaultAddress(
             @PathVariable Long addressId) {

@@ -37,6 +37,22 @@ export function useCreateAddress() {
   });
 }
 
+export function useUpdateAddress() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: CreateAddressRequest }) => {
+      const resData = await apiFetch(`/users/me/addresses/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return resData.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    },
+  });
+}
+
 export function useDeleteAddress() {
   const queryClient = useQueryClient();
   return useMutation({
