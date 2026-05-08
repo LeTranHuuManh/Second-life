@@ -40,7 +40,13 @@ export function useCreateAddress() {
 export function useUpdateAddress() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: CreateAddressRequest }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: CreateAddressRequest;
+    }) => {
       const resData = await apiFetch(`/users/me/addresses/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
