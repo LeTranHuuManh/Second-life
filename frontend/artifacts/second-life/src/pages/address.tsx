@@ -18,16 +18,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, MapPin, CheckCircle, Plus } from "lucide-react";
+import { Trash2, MapPin, CheckCircle, Plus, Pencil } from "lucide-react";
 
 export default function AddressPage() {
   const { data: addresses, isLoading } = useAddresses();
   const createAddress = useCreateAddress();
+  const updateAddress = useUpdateAddress();
   const deleteAddress = useDeleteAddress();
   const setDefaultAddress = useSetDefaultAddress();
   const { toast } = useToast();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     phoneNumber: "",
@@ -35,20 +37,41 @@ export default function AddressPage() {
     isDefault: false,
   });
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createAddress.mutateAsync(formData);
-      toast({ title: "Thêm địa chỉ thành công!" });
+      if (editingId) {
+        await updateAddress.mutateAsync({ id: editingId, data: formData });
+        toast({ title: "Cập nhật địa chỉ thành công!" });
+      } else {
+        await createAddress.mutateAsync(formData);
+        toast({ title: "Thêm địa chỉ thành công!" });
+      }
       setIsOpen(false);
-      setFormData({ name: "", phoneNumber: "", address: "", isDefault: false });
+      resetForm();
     } catch (error: any) {
       toast({
-        title: "Lỗi thêm địa chỉ",
+        title: editingId ? "Lỗi cập nhật địa chỉ" : "Lỗi thêm địa chỉ",
         description: error.message,
         variant: "destructive",
       });
     }
+  };
+
+  const resetForm = () => {
+    setEditingId(null);
+    setFormData({ name: "", phoneNumber: "", address: "", isDefault: false });
+  };
+
+  const handleEdit = (address: any) => {
+    setFormData({
+      name: address.name,
+      phoneNumber: address.phoneNumber,
+      address: address.address,
+      isDefault: address.isDefault,
+    });
+    setEditingId(address.id);
+    setIsOpen(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -74,19 +97,22 @@ export default function AddressPage() {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold font-display">Địa chỉ của tôi</h1>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+          setIsOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
-            <Button className="rounded-full shadow-colored hover:-translate-y-0.5 transition-all">
+            <Button className="rounded-full shadow-colored hover:-translate-y-0.5 transition-all" onClick={resetForm}>
               <Plus className="w-5 h-5 mr-2" /> Thêm địa chỉ mới
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md rounded-3xl p-6">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold font-display">
-                Thêm địa chỉ
+                {editingId ? "Sửa địa chỉ" : "Thêm địa chỉ"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4 mt-4">
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Họ và tên</Label>
                 <Input
@@ -191,6 +217,14 @@ export default function AddressPage() {
                 <p className="text-foreground">{addr.address}</p>
               </div>
               <div className="flex flex-row md:flex-col gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full flex-1"
+                  onClick={() => handleEdit(addr)}
+                >
+                  <Pencil className="w-4 h-4 mr-2" /> Sửa
+                </Button>
                 {!addr.isDefault && (
                   <Button
                     variant="outline"
