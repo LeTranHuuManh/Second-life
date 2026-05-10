@@ -19,6 +19,7 @@ export default function Checkout() {
   const createOrder = useCreateOrder();
   const { data: addresses, isLoading: addressLoading } = useAddresses();
   const [successOpen, setSuccessOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("VNPAY");
 
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(
     null,
@@ -49,20 +50,39 @@ export default function Checkout() {
     return acc;
   }, 0);
 
-  const deposit = total * 0.3; // 30% deposit rule for Second Life
-
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAddress) {
       alert("Vui lòng chọn địa chỉ giao hàng!");
       return;
     }
-    await createOrder.mutateAsync({
-      items,
-      total,
-      status: "pending",
+
+    const orderItems = items.map((item) => {
+      const requestItem: any = {
+        productId: item.product.id,
+        type: item.type === "buy" ? "BUY" : "RENT",
+      };
+
+      if (item.type === "rent" && item.startDate && item.endDate) {
+        requestItem.startDate = item.startDate.toISOString().split("T")[0];
+        requestItem.endDate = item.endDate.toISOString().split("T")[0];
+      }
+      return requestItem;
     });
-    setSuccessOpen(true);
+
+    try {
+      const createdOrders = await createOrder.mutateAsync({
+        addressId: selectedAddress.id,
+        paymentMethod: paymentMethod,
+        note: "",
+        items: orderItems,
+      });
+      // Nếu sau này bạn cần list các mã đơn ra:
+      // console.log("Các order ID được tạo:", createdOrders.map(o => o.id));
+      setSuccessOpen(true);
+    } catch (error) {
+      alert("Có lỗi xảy ra khi tạo đơn hàng, vui lòng thử lại!");
+    }
   };
 
   const closeSuccess = () => {
@@ -164,24 +184,44 @@ export default function Checkout() {
               Phương thức thanh toán
             </h3>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 p-4 border border-primary bg-primary/5 rounded-2xl cursor-pointer">
+              <label
+                className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition-all ${
+                  paymentMethod === "VNPAY"
+                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                    : "border-border hover:bg-secondary/20"
+                }`}
+              >
                 <input
                   type="radio"
                   name="payment"
-                  defaultChecked
+                  value="VNPAY"
+                  checked={paymentMethod === "VNPAY"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
                   className="w-4 h-4 text-primary"
                 />
                 <span className="font-medium">
                   Chuyển khoản ngân hàng / VNPay
                 </span>
               </label>
-              <label className="flex items-center gap-3 p-4 border border-border rounded-2xl cursor-pointer hover:bg-secondary/20">
+
+              <label
+                className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition-all ${
+                  paymentMethod === "COD"
+                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                    : "border-border hover:bg-secondary/20"
+                }`}
+              >
                 <input
                   type="radio"
                   name="payment"
+                  value="COD"
+                  checked={paymentMethod === "COD"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
                   className="w-4 h-4 text-primary"
                 />
-                <span className="font-medium">Thẻ tín dụng / Ghi nợ</span>
+                <span className="font-medium">
+                  Thanh toán tiền mặt khi nhận hàng (COD)
+                </span>
               </label>
             </div>
           </section>
@@ -212,13 +252,9 @@ export default function Checkout() {
             </div>
 
             <div className="border-t border-border/80 pt-4 space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span>Tổng tiền hàng</span>
-                <span className="font-medium">{formatPrice(total)}</span>
-              </div>
-              <div className="flex justify-between items-center bg-amber-50 text-amber-800 p-3 rounded-xl border border-amber-200">
-                <span>Đặt cọc an toàn (30%)</span>
-                <span className="font-bold">{formatPrice(deposit)}</span>
+              <div className="flex justify-between font-bold text-lg">
+                <span>Tổng thanh toán</span>
+                <span className="text-primary">{formatPrice(total)}</span>
               </div>
             </div>
 
@@ -230,7 +266,7 @@ export default function Checkout() {
             >
               {createOrder.isPending
                 ? "Đang xử lý..."
-                : `Thanh toán cọc ${formatPrice(deposit)}`}
+                : `Thanh toán ${formatPrice(total)}`}
             </Button>
             <p className="text-center text-xs text-muted-foreground mt-4">
               Bằng việc đặt hàng, bạn đồng ý với Điều khoản của Second Life.

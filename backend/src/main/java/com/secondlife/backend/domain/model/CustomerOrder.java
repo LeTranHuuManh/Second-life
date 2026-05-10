@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.secondlife.backend.domain.enums.OrderStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,7 +33,7 @@ public class CustomerOrder extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserAccount user;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
 
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
@@ -53,6 +54,16 @@ public class CustomerOrder extends BaseEntity {
 
     @OneToMany(mappedBy = "order")
     private Set<TransactionRecord> transactions = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipping_address_id")
+    private UserAddress shippingAddress;
+
+    @Column(name = "shipping_fee", precision = 15, scale = 2)
+    private BigDecimal shippingFee = BigDecimal.ZERO;
+
+    @Column(name = "note", length = 1000)
+    private String note;
 
     public Long getId() {
         return id;
@@ -112,5 +123,29 @@ public class CustomerOrder extends BaseEntity {
 
     public Set<TransactionRecord> getTransactions() {
         return transactions;
+    }
+
+    public UserAddress getShippingAddress() {
+        return shippingAddress;
+    }
+
+    public void setShippingAddress(UserAddress shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
+
+    public BigDecimal getShippingFee() {
+        return shippingFee;
+    }
+
+    public void setShippingFee(BigDecimal shippingFee) {
+        this.shippingFee = shippingFee;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

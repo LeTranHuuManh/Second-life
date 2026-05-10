@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useOrders, useConfirmReceived, useSubmitReview, Order } from "@/hooks/use-orders";
+import { useOrders, useConfirmReceived, useSubmitReview, OrderResponse } from "@/hooks/use-orders";
 import { formatPrice } from "@/components/product-card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -33,27 +33,27 @@ const STATUS_CONFIG: Record<
   string,
   { label: string; color: string; icon: React.ReactNode }
 > = {
-  pending: {
+  PENDING: {
     label: "Chờ duyệt",
     color: "bg-amber-100 text-amber-700",
     icon: <Clock className="w-3.5 h-3.5" />,
   },
-  processing: {
+  PROCESSING: {
     label: "Đang thực hiện",
     color: "bg-blue-100 text-blue-700",
     icon: <Settings2 className="w-3.5 h-3.5" />,
   },
-  shipping: {
+  SHIPPING: {
     label: "Đang giao hàng",
     color: "bg-violet-100 text-violet-700",
     icon: <Truck className="w-3.5 h-3.5" />,
   },
-  delivered: {
+  DELIVERED: {
     label: "Chờ xác nhận",
     color: "bg-orange-100 text-orange-700",
     icon: <PackageCheck className="w-3.5 h-3.5" />,
   },
-  completed: {
+  COMPLETED: {
     label: "Hoàn thành",
     color: "bg-emerald-100 text-emerald-700",
     icon: <CheckCircle2 className="w-3.5 h-3.5" />,
@@ -136,7 +136,7 @@ function ReviewModal({
   open,
   onClose,
 }: {
-  order: Order;
+  order: OrderResponse;
   open: boolean;
   onClose: () => void;
 }) {
@@ -181,13 +181,13 @@ function ReviewModal({
           {/* Product preview */}
           <div className="flex items-center gap-3 bg-secondary/40 rounded-2xl p-3">
             <img
-              src={order.items[0].product.images[0]}
+              src={order.items[0].productImageUrl}
               className="w-12 h-12 rounded-xl object-cover border border-border"
               alt=""
             />
             <div className="min-w-0">
               <p className="font-semibold text-sm line-clamp-1">
-                {order.items[0].product.name}
+                {order.items[0].productName}
               </p>
               <p className="text-xs text-muted-foreground">Mã ĐH: {order.id}</p>
             </div>
@@ -271,11 +271,11 @@ function ReviewModal({
 
 // ─── Order card ───────────────────────────────────────────────────────────────
 
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order }: { order: OrderResponse }) {
   const { mutate: confirm, isPending: confirming } = useConfirmReceived();
   const [reviewOpen, setReviewOpen] = useState(false);
 
-  const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending;
+  const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.PENDING;
 
   const createdDate = new Date(order.createdAt).toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -310,37 +310,33 @@ function OrderCard({ order }: { order: Order }) {
           {order.items.map((item, idx) => (
             <div key={idx} className="flex items-center gap-4 py-4">
               <img
-                src={item.product.images[0]}
+                src={item.productImageUrl}
                 className="w-16 h-16 rounded-xl object-cover border border-border shrink-0"
-                alt={item.product.name}
+                alt={item.productName}
               />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm text-foreground line-clamp-1">
-                  {item.product.name}
+                  {item.productName}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  {item.type === "buy" ? (
+                  {item.type === "BUY" ? (
                     <Badge className="bg-emerald-50 text-emerald-700 border-0 text-xs">Mua</Badge>
                   ) : (
                     <Badge className="bg-blue-50 text-blue-700 border-0 text-xs">Thuê</Badge>
                   )}
-                  {item.type === "rent" && item.rentStart && item.rentEnd && (
+                  {item.type === "RENT" && item.startDate && item.endDate && (
                     <span className="text-xs text-muted-foreground">
-                      {new Date(item.rentStart).toLocaleDateString("vi-VN")} →{" "}
-                      {new Date(item.rentEnd).toLocaleDateString("vi-VN")}
+                      {new Date(item.startDate).toLocaleDateString("vi-VN")} →{" "}
+                      {new Date(item.endDate).toLocaleDateString("vi-VN")}
                     </span>
                   )}
-                  {item.type === "buy" && (
-                    <span className="text-xs text-muted-foreground">x{item.quantity}</span>
+                  {item.type === "BUY" && (
+                    <span className="text-xs text-muted-foreground">x1</span>
                   )}
                 </div>
               </div>
               <div className="text-sm font-bold text-foreground shrink-0">
-                {formatPrice(
-                  item.type === "buy"
-                    ? (item.product.buyPrice ?? 0) * item.quantity
-                    : item.product.rentPricePerDay ?? 0
-                )}
+                {formatPrice(item.priceAtPurchase)}
               </div>
             </div>
           ))}
@@ -351,13 +347,13 @@ function OrderCard({ order }: { order: Order }) {
           <div className="text-sm text-muted-foreground">
             Tổng:{" "}
             <span className="text-lg font-bold text-primary ml-1">
-              {formatPrice(order.total)}
+              {formatPrice(order.totalAmount)}
             </span>
           </div>
 
           <div className="flex gap-2">
             {/* Delivered → confirm received */}
-            {order.status === "delivered" && (
+            {order.status === "DELIVERED" && (
               <Button
                 size="sm"
                 className="rounded-full font-bold bg-orange-500 hover:bg-orange-600 text-white"
@@ -374,7 +370,7 @@ function OrderCard({ order }: { order: Order }) {
             )}
 
             {/* Completed + not reviewed → review */}
-            {order.status === "completed" && !order.reviewed && (
+            {order.status === "COMPLETED" && !order.reviewed && (
               <Button
                 size="sm"
                 variant="outline"
@@ -387,7 +383,7 @@ function OrderCard({ order }: { order: Order }) {
             )}
 
             {/* Completed + already reviewed */}
-            {order.status === "completed" && order.reviewed && (
+            {order.status === "COMPLETED" && order.reviewed && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground px-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                 Đã đánh giá
@@ -428,8 +424,8 @@ function OrderList({
   filter,
   emptyLabel,
 }: {
-  orders: Order[];
-  filter?: Order["status"] | "all";
+  orders: OrderResponse[];
+  filter?: OrderResponse["status"] | "all";
   emptyLabel: string;
 }) {
   const filtered =
@@ -452,11 +448,11 @@ function OrderList({
 
 const TABS = [
   { value: "all", label: "Tất cả", filter: "all" as const, emptyLabel: "" },
-  { value: "pending", label: "Chờ duyệt", filter: "pending" as const, emptyLabel: "chờ duyệt" },
-  { value: "processing", label: "Đang thực hiện", filter: "processing" as const, emptyLabel: "đang thực hiện" },
-  { value: "shipping", label: "Đang giao hàng", filter: "shipping" as const, emptyLabel: "đang giao" },
-  { value: "delivered", label: "Chờ xác nhận", filter: "delivered" as const, emptyLabel: "chờ xác nhận" },
-  { value: "completed", label: "Hoàn thành", filter: "completed" as const, emptyLabel: "hoàn thành" },
+  { value: "PENDING", label: "Chờ duyệt", filter: "PENDING" as const, emptyLabel: "chờ duyệt" },
+  { value: "PROCESSING", label: "Đang thực hiện", filter: "PROCESSING" as const, emptyLabel: "đang thực hiện" },
+  { value: "SHIPPING", label: "Đang giao hàng", filter: "SHIPPING" as const, emptyLabel: "đang giao" },
+  { value: "DELIVERED", label: "Chờ xác nhận", filter: "DELIVERED" as const, emptyLabel: "chờ xác nhận" },
+  { value: "COMPLETED", label: "Hoàn thành", filter: "COMPLETED" as const, emptyLabel: "hoàn thành" },
 ];
 
 export default function Orders() {

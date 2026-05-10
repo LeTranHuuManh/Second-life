@@ -207,7 +207,6 @@ export default function CreateProductPage() {
         condition: formData.condition,
         location: formData.location,
         categoryId: Number(formData.categoryId),
-        sellerId: 1, // <--- Thay ID người dùng thật ở đây
       };
 
       const productResponse = await createProduct(productPayload);

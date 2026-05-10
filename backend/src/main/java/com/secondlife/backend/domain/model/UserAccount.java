@@ -42,6 +42,9 @@ public class UserAccount extends BaseEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private SellerProfile sellerProfile;
+
     @OneToMany(mappedBy = "seller")
     private Set<Product> postedProducts = new HashSet<>();
 
@@ -95,6 +98,14 @@ public class UserAccount extends BaseEntity {
 
     public void setProfile(UserProfile profile) {
         this.profile = profile;
+    }
+
+    public SellerProfile getSellerProfile() {
+        return sellerProfile;
+    }
+
+    public void setSellerProfile(SellerProfile sellerProfile) {
+        this.sellerProfile = sellerProfile;
     }
 
     public Set<Product> getPostedProducts() {

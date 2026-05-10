@@ -30,8 +30,5 @@ public class ProductCreateRequest {
     @NotNull(message = "ID danh mục không được để trống")
     private Long categoryId;
     
-    @NotNull(message = "ID người bán (seller) không được để trống")
-    private Long sellerId;
-    
     private List<String> images;
 }

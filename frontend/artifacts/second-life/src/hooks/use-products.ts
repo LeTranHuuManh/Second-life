@@ -167,13 +167,16 @@ export function useProduct(id: string) {
               ? product.images
               : ["/images/placeholder.png"],
           shop: {
-            id: String(product.sellerId),
-            name: `Seller ${product.sellerId}`,
-            avatar: "https://i.pravatar.cc/150?img=11",
-            address: product.location || "TP. Hồ Chí Minh",
-            joinedAt: "2023-01-15T00:00:00Z",
-            totalOrders: 10,
-            rating: 5,
+            id: String(product.seller?.id || product.sellerId),
+            name:
+              product.seller?.fullName ||
+              `Seller ${product.seller?.id || product.sellerId}`,
+            avatar:
+              product.seller?.avatarUrl || "https://i.pravatar.cc/150?img=11",
+            address: product.seller?.address || "",
+            joinedAt: product.seller?.joinedAt || "",
+            totalOrders: product.seller?.totalOrders || 0,
+            rating: product.seller?.rating ? Number(product.seller.rating) : 0,
           },
           status: product.status === "AVAILABLE" ? "available" : "sold",
           rating: 0,

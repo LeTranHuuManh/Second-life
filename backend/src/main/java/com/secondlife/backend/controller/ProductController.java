@@ -1,6 +1,7 @@
 package com.secondlife.backend.controller;
 
 import com.secondlife.backend.domain.dto.product.ProductCreateRequest;
+import com.secondlife.backend.domain.dto.product.ProductDetailResponse;
 import com.secondlife.backend.domain.dto.product.ProductResponse;
 import com.secondlife.backend.service.CloudinaryService;
 import com.secondlife.backend.service.ProductService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,7 +39,8 @@ public class ProductController {
     @PostMapping
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest request) {
-        ProductResponse response = productService.createProduct(request);
+        Long currentUserId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ProductResponse response = productService.createProduct(request, currentUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -86,8 +89,8 @@ public class ProductController {
      * API Lấy thông tin chi tiết một sản phẩm theo ID
      */
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable("productId") Long productId) {
-        ProductResponse product = productService.getProductById(productId);
+    public ResponseEntity<ProductDetailResponse> getProductById(@PathVariable("productId") Long productId) {
+        ProductDetailResponse product = productService.getProductById(productId);
         return ResponseEntity.ok(product);
     }
 

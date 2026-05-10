@@ -17,4 +17,6 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @Query("SELECT SUM(i.priceAtPurchase) FROM OrderItem i WHERE i.product.seller.id = :sellerId")
     BigDecimal sumRevenueBySellerId(@Param("sellerId") Long sellerId);
+
+    List<CustomerOrder> findByUser_IdOrderByCreatedAtDesc(Long userId);
 }

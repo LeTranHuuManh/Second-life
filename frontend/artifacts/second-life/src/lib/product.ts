@@ -9,7 +9,6 @@ export interface CreateProductData {
   location: string;
   listingType: string; // "SELL", "RENT", "SELL_AND_RENT"
   categoryId: number;
-  sellerId: number;
 }
 
 /**

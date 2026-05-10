@@ -13,6 +13,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import com.secondlife.backend.domain.enums.OrderItemType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 @Entity
 @Table(name = "order_items")
 public class OrderItem extends BaseEntity {
@@ -28,6 +32,10 @@ public class OrderItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_type", nullable = false, length = 20)
+    private OrderItemType itemType;
 
     @Column(name = "price_at_purchase", nullable = false, precision = 15, scale = 2)
     private BigDecimal priceAtPurchase;
@@ -59,6 +67,14 @@ public class OrderItem extends BaseEntity {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public OrderItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(OrderItemType itemType) {
+        this.itemType = itemType;
     }
 
     public BigDecimal getPriceAtPurchase() {

@@ -635,7 +635,14 @@ export default function ProductDetail() {
   }
 
   const related2 = (related ?? []).filter((p) => p.id !== product.id);
-  const shopJoined = formatTimeAgo(product.shop.joinedAt);
+  const shopName = product.shop.name;
+  const shopAvatar = product.shop.avatar;
+  const shopAddress = product.shop.address || "";
+  const shopRating = product.shop.rating ?? 0;
+  const shopTotalOrders = product.shop.totalOrders ?? 0;
+  const shopJoined = product.shop.joinedAt
+    ? formatTimeAgo(product.shop.joinedAt)
+    : "";
 
   return (
     <div className="w-full">
@@ -697,7 +704,7 @@ export default function ProductDetail() {
 
             {/* Prices */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {product.buyPrice && (
+              {product.buyPrice > 0 && (
                 <div className="bg-secondary/40 border border-secondary rounded-2xl p-4">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
                     Giá bán
@@ -711,7 +718,7 @@ export default function ProductDetail() {
                   )}
                 </div>
               )}
-              {product.rentPricePerDay && (
+              {product.rentPricePerDay > 0 && (
                 <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
                     Giá thuê
@@ -732,7 +739,7 @@ export default function ProductDetail() {
 
             {/* Action buttons — 3 in a row */}
             <div className="flex flex-col sm:flex-row gap-3">
-              {product.rentPricePerDay && (
+              {product.rentPricePerDay > 0 && (
                 <Button
                   size="lg"
                   variant="outline"
@@ -743,7 +750,7 @@ export default function ProductDetail() {
                   Thuê ngay
                 </Button>
               )}
-              {product.buyPrice && (
+              {product.buyPrice > 0 && (
                 <Button
                   size="lg"
                   className="flex-1 rounded-2xl font-bold h-12 shadow-colored hover:-translate-y-0.5 transition-transform"
@@ -768,34 +775,36 @@ export default function ProductDetail() {
               <div className="flex items-start gap-4">
                 <Link href={`/cua-hang/${product.shop.id}`}>
                   <img
-                    src={product.shop.avatar}
+                    src={shopAvatar}
                     className="w-14 h-14 rounded-2xl object-cover border border-border hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer"
-                    alt={product.shop.name}
+                    alt={shopName}
                   />
                 </Link>
                 <div className="flex-1 min-w-0">
                   <Link href={`/cua-hang/${product.shop.id}`}>
                     <h4 className="font-bold text-base hover:text-primary transition-colors cursor-pointer">
-                      {product.shop.name}
+                      {shopName}
                     </h4>
                   </Link>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{product.shop.address}</span>
+                    <span className="truncate">{shopAddress}</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Package className="w-3 h-3" />
-                      {product.shop.totalOrders.toLocaleString("vi-VN")} đơn
+                      {shopTotalOrders.toLocaleString("vi-VN")} đơn
                     </span>
                     <span className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      {product.shop.rating} / 5.0
+                      {shopRating} / 5.0
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      Tham gia {shopJoined}
-                    </span>
+                    {shopJoined && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Tham gia {shopJoined}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -928,7 +937,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Buy Modal */}
-      {product.buyPrice && (
+      {product.buyPrice > 0 && (
         <BuyModal
           open={isBuyModalOpen}
           onClose={() => setIsBuyModalOpen(false)}
@@ -938,7 +947,7 @@ export default function ProductDetail() {
       )}
 
       {/* Rent Modal */}
-      {product.rentPricePerDay && (
+      {product.rentPricePerDay > 0 && (
         <RentModal
           open={isRentModalOpen}
           onClose={() => setIsRentModalOpen(false)}

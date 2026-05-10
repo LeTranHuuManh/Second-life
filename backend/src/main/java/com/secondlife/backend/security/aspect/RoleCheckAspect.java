@@ -1,6 +1,5 @@
 package com.secondlife.backend.security.aspect;
 
-import com.secondlife.backend.domain.enums.UserRole;
 import com.secondlife.backend.domain.model.UserAccount;
 import com.secondlife.backend.common.exception.ForbiddenException;
 import com.secondlife.backend.security.annotation.RequireRole;
@@ -8,13 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Slf4j

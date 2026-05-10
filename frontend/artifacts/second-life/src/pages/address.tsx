@@ -97,12 +97,18 @@ export default function AddressPage() {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold font-display">Địa chỉ của tôi</h1>
-        <Dialog open={isOpen} onOpenChange={(open) => {
-          setIsOpen(open);
-          if (!open) resetForm();
-        }}>
+        <Dialog
+          open={isOpen}
+          onOpenChange={(open) => {
+            setIsOpen(open);
+            if (!open) resetForm();
+          }}
+        >
           <DialogTrigger asChild>
-            <Button className="rounded-full shadow-colored hover:-translate-y-0.5 transition-all" onClick={resetForm}>
+            <Button
+              className="rounded-full shadow-colored hover:-translate-y-0.5 transition-all"
+              onClick={resetForm}
+            >
               <Plus className="w-5 h-5 mr-2" /> Thêm địa chỉ mới
             </Button>
           </DialogTrigger>

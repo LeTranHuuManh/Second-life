@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByStatusOrderByCreatedAtDesc(ProductStatus status, Pageable pageable);
     Page<Product> findBySellerOrderByCreatedAtDesc(UserAccount seller, Pageable pageable);
+    long countBySeller_Id(Long sellerId);
 }

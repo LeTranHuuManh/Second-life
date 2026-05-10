@@ -3,9 +3,7 @@ import {
   MapPin,
   Star,
   Package,
-  Clock,
   MessageCircle,
-  ChevronRight,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,27 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/product-card";
 import { useProducts } from "@/hooks/use-products";
 import { getCategories, CategoryData } from "@/hooks/use-categories";
+import { useSellerProfile } from "@/hooks/use-seller-profile";
 import { CategoryIcon } from "@/components/category-icon";
-import React, { useState, useEffect } from "react";
-
-const MOCK_SHOP = {
-  id: "1",
-  name: "Shop Đồ Gỗ Thủ Công Hà Nội",
-  avatar: "https://i.pravatar.cc/80?img=1",
-  coverImage: "https://picsum.photos/seed/shop1/1200/300",
-  address: "123 Nguyễn Trãi, Thanh Xuân",
-  province: "Hà Nội",
-  ward: "Phường Nhân Chính",
-  totalOrders: 256,
-  totalProducts: 42,
-  joinedDate: "03/2022",
-  rating: 4.8,
-  ratingCount: 189,
-  description:
-    "Chuyên đồ gỗ thủ công, nội thất vintage chất lượng cao. Cam kết uy tín, hàng đúng mô tả.",
-  responseRate: "98%",
-  responseTime: "Trong vài phút",
-};
+import { useState, useEffect } from "react";
 
 export default function Shop() {
   const { id } = useParams();
@@ -44,18 +24,38 @@ export default function Shop() {
     getCategories().then(setCategories).catch(console.error);
   }, []);
 
+  const { data: sellerProfile, isLoading: isLoadingProfile } =
+    useSellerProfile(id);
+
   const { data: products, isLoading } = useProducts();
 
-  const filteredProducts = (products || []).filter(
-    (p) => selectedCategory === "all" || p.category === selectedCategory,
-  );
+  const filteredProducts = (products || []).filter((p) => {
+    const matchesCategory =
+      selectedCategory === "all" || p.category === selectedCategory;
+    const productSellerId = p.sellerId ?? p.seller?.id;
+    const matchesSeller =
+      !id || !productSellerId || String(productSellerId) === String(id);
+    return matchesCategory && matchesSeller;
+  });
+
+  const shopName = sellerProfile?.name || "Cửa hàng";
+  const shopAvatar = sellerProfile?.avatar || "/images/placeholder.png";
+  const shopCover = sellerProfile?.coverImage || "/images/placeholder.png";
+  const shopAddress = sellerProfile?.address || "";
+  const shopRating = sellerProfile?.rating ?? 0;
+  const shopRatingCount = sellerProfile?.ratingCount ?? 0;
+  const shopDescription = sellerProfile?.description || "";
+  const shopTotalProducts = sellerProfile?.totalProducts ?? 0;
+  const shopTotalOrders = sellerProfile?.totalOrders ?? 0;
+  const shopResponseRate = sellerProfile?.responseRate || "--";
+  const shopJoinedDate = sellerProfile?.joinedDate || "--";
 
   return (
     <div className="w-full">
       {/* Shop Banner */}
       <div className="relative h-40 md:h-56 overflow-hidden bg-gradient-to-r from-primary/20 to-secondary">
         <img
-          src={MOCK_SHOP.coverImage}
+          src={shopCover}
           alt="Shop banner"
           className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-multiply"
         />
@@ -66,29 +66,29 @@ export default function Shop() {
         <div className="bg-white rounded-3xl border border-border shadow-sm p-6 -mt-8 relative z-10 mb-6">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
             <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg flex-shrink-0">
-              <AvatarImage src={MOCK_SHOP.avatar} />
+              <AvatarImage src={shopAvatar} />
               <AvatarFallback className="bg-primary/20 text-primary text-xl">
-                {MOCK_SHOP.name[0]}
+                {shopName[0] || "S"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div>
                   <h1 className="text-2xl font-bold font-display">
-                    {MOCK_SHOP.name}
+                    {shopName}
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {MOCK_SHOP.address}, {MOCK_SHOP.province}
+                      {shopAddress}
                     </span>
                     <span className="flex items-center gap-1">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      {MOCK_SHOP.rating} ({MOCK_SHOP.ratingCount} đánh giá)
+                      {shopRating} ({shopRatingCount} đánh giá)
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    {MOCK_SHOP.description}
+                    {shopDescription}
                   </p>
                 </div>
                 <div className="flex gap-3 flex-shrink-0">
@@ -102,19 +102,19 @@ export default function Shop() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5 border-t border-border/60">
                 <div className="text-center">
-                  <p className="font-bold text-lg">{MOCK_SHOP.totalProducts}</p>
+                  <p className="font-bold text-lg">{shopTotalProducts}</p>
                   <p className="text-xs text-muted-foreground">Sản phẩm</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-lg">{MOCK_SHOP.totalOrders}</p>
+                  <p className="font-bold text-lg">{shopTotalOrders}</p>
                   <p className="text-xs text-muted-foreground">Đơn hàng</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-lg">{MOCK_SHOP.responseRate}</p>
+                  <p className="font-bold text-lg">{shopResponseRate}</p>
                   <p className="text-xs text-muted-foreground">Phản hồi</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-sm">{MOCK_SHOP.joinedDate}</p>
+                  <p className="font-bold text-sm">{shopJoinedDate}</p>
                   <p className="text-xs text-muted-foreground">Tham gia</p>
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function Shop() {
         </div>
 
         {/* Products Grid */}
-        {isLoading ? (
+        {isLoading || isLoadingProfile ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
