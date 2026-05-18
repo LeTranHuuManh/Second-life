@@ -6,6 +6,10 @@ import {
   type SellerOrderStatus,
 } from "@/hooks/use-seller-orders";
 import {
+  useSellerProfile,
+  useUpdateSellerProfile,
+} from "@/hooks/use-seller-profile";
+import {
   AreaChart,
   Area,
   XAxis,
@@ -35,6 +39,7 @@ import {
   PackageCheck,
   Pencil,
   Trash2,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -100,11 +105,67 @@ const ORDER_STATUS_OPTIONS: SellerOrderStatus[] = [
 ];
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
+
+  const userIdNumber = user?.id
+    ? typeof user.id === "string"
+      ? parseInt(user.id)
+      : user.id
+    : 1;
+
+  const { data: sellerProfile } = useSellerProfile(userIdNumber);
+  const updateSellerMutation = useUpdateSellerProfile();
+
   const [page, setPage] = useState(0);
   const [statusSelections, setStatusSelections] = useState<
     Record<number, SellerOrderStatus>
   >({});
+
+  // Shop Info Edit State
+  const [editShopOpen, setEditShopOpen] = useState(false);
+  const [editShopForm, setEditShopForm] = useState<{
+    name: string;
+    description: string;
+    phone: string;
+    address: string;
+    avatar: File | null;
+    coverImage: File | null;
+  }>({
+    name: sellerProfile?.name || "",
+    description: sellerProfile?.description || "",
+    phone: sellerProfile?.phone || "",
+    address: sellerProfile?.address || "",
+    avatar: null,
+    coverImage: null,
+  });
+
+  const handleEditShopSubmit = () => {
+    if (!editShopForm.name.trim()) return;
+
+    updateSellerMutation.mutate(
+      {
+        sellerId: userIdNumber,
+        data: {
+          shopName: editShopForm.name,
+          description: editShopForm.description,
+          phone: editShopForm.phone,
+          address: editShopForm.address,
+          avatar: editShopForm.avatar || undefined,
+          coverImage: editShopForm.coverImage || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEditShopOpen(false);
+          // Update local auth context if user name changed and seller has the same name
+          if (user && editShopForm.name !== user.name) {
+            login({ ...user, name: editShopForm.name });
+          }
+        },
+      },
+    );
+  };
+
   const [editOpen, setEditOpen] = useState(false);
   const [editProductId, setEditProductId] = useState<number | null>(null);
   const [editError, setEditError] = useState("");
@@ -120,12 +181,6 @@ export default function Dashboard() {
     listingType: "SELL",
     categoryId: "",
   });
-
-  const userIdNumber = user?.id
-    ? typeof user.id === "string"
-      ? parseInt(user.id)
-      : user.id
-    : 1;
 
   const { data: userProducts = [], isLoading: isLoadingProducts } =
     useUserProducts(userIdNumber, {
@@ -267,12 +322,47 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold font-display">Quản lý bán hàng</h1>
-          <p className="text-muted-foreground mt-1">
-            Chào mừng trở lại, {user?.name || "Shop"}
-          </p>
+      <div className="flex justify-between items-start mb-8">
+        <div className="flex gap-4 items-center">
+          {sellerProfile?.avatar ? (
+            <img
+              src={sellerProfile.avatar}
+              alt="Avatar"
+              className="w-16 h-16 rounded-full object-cover shadow-sm bg-muted"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground shadow-sm">
+              <Store className="w-6 h-6" />
+            </div>
+          )}
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold font-display">
+                {sellerProfile?.name || "Quản lý bán hàng"}
+              </h1>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full shadow-sm"
+                onClick={() => {
+                  setEditShopForm({
+                    name: sellerProfile?.name || "",
+                    description: sellerProfile?.description || "",
+                    phone: sellerProfile?.phone || "",
+                    address: sellerProfile?.address || "",
+                    avatar: null,
+                    coverImage: null,
+                  });
+                  setEditShopOpen(true);
+                }}
+              >
+                <Pencil className="w-3 h-3 mr-1.5" /> Sửa thông tin
+              </Button>
+            </div>
+            <p className="text-muted-foreground mt-1 text-sm line-clamp-2 max-w-md">
+              {sellerProfile?.description || "Chưa có giới thiệu về shop"}
+            </p>
+          </div>
         </div>
         <Link href="/dang-ban">
           <Button className="rounded-full shadow-colored font-bold px-6">
@@ -287,6 +377,121 @@ export default function Dashboard() {
           <TabsTrigger value="products">Sản phẩm của tôi</TabsTrigger>
           <TabsTrigger value="orders">Đơn hàng khách đặt</TabsTrigger>
         </TabsList>
+
+        <Dialog open={editShopOpen} onOpenChange={setEditShopOpen}>
+          <DialogContent className="max-w-sm rounded-3xl p-0 overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-0">
+              <DialogTitle className="text-xl font-bold font-display">
+                Chỉnh sửa thông tin Shop
+              </DialogTitle>
+            </DialogHeader>
+            <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Tên Shop
+                </label>
+                <Input
+                  value={editShopForm.name}
+                  onChange={(e) =>
+                    setEditShopForm({ ...editShopForm, name: e.target.value })
+                  }
+                  placeholder="Nhập tên shop"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Giới thiệu ngắn
+                </label>
+                <Textarea
+                  value={editShopForm.description}
+                  onChange={(e) =>
+                    setEditShopForm({
+                      ...editShopForm,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Mô tả về shop của bạn"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Số điện thoại
+                </label>
+                <Input
+                  value={editShopForm.phone}
+                  onChange={(e) =>
+                    setEditShopForm({ ...editShopForm, phone: e.target.value })
+                  }
+                  placeholder="Nhập số điện thoại"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Địa chỉ
+                </label>
+                <Input
+                  value={editShopForm.address}
+                  onChange={(e) =>
+                    setEditShopForm({
+                      ...editShopForm,
+                      address: e.target.value,
+                    })
+                  }
+                  placeholder="Nhập địa chỉ của shop"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Ảnh đại diện (Avatar)
+                </label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setEditShopForm({ ...editShopForm, avatar: file });
+                  }}
+                  className="text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Ảnh bìa (Cover)
+                </label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setEditShopForm({ ...editShopForm, coverImage: file });
+                  }}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+            <DialogFooter className="px-6 pb-6 flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-full"
+                onClick={() => setEditShopOpen(false)}
+              >
+                Huỷ
+              </Button>
+              <Button
+                className="flex-1 rounded-full font-bold"
+                onClick={handleEditShopSubmit}
+              >
+                Lưu
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
