@@ -89,7 +89,7 @@ public class CustomerOrderServiceImpl implements CustomerOrderService {
             order.setShippingAddress(address);
             order.setNote(request.getNote());
             order.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "PayOS");
-            order.setStatus(OrderStatus.PENDING_PAYMENT);
+            order.setStatus(OrderStatus.PENDING);
 
             // Calculate fees per seller order
             BigDecimal shippingFee = BigDecimal.valueOf(30000); // 30k default shipping fee for testing

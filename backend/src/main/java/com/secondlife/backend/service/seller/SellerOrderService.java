@@ -1,6 +1,7 @@
 package com.secondlife.backend.service.seller;
 
 import com.secondlife.backend.domain.dto.seller.SellerOrderResponse;
+import com.secondlife.backend.domain.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,4 +11,5 @@ public interface SellerOrderService {
     List<SellerOrderResponse> getSellerOrders(Long sellerId);
     Page<SellerOrderResponse> getSellerOrdersPaged(Long sellerId, Pageable pageable);
     void approveOrder(Long sellerId, Long orderItemId);
+    void updateOrderStatus(Long sellerId, Long orderItemId, OrderStatus status);
 }

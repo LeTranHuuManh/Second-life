@@ -1,6 +1,8 @@
 package com.secondlife.backend.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import lombok.*;
 
 import java.time.Instant;
@@ -21,6 +23,7 @@ public class RefreshToken {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount user;
 
     @Column(nullable = false)

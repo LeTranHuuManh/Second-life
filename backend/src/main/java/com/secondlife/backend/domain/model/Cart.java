@@ -9,9 +9,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "carts")
@@ -23,9 +26,10 @@ public class Cart extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount user;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartItem> items = new HashSet<>();
 
     public Long getId() {

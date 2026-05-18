@@ -1,6 +1,7 @@
 package com.secondlife.backend.service;
 
 import com.secondlife.backend.domain.dto.product.ProductCreateRequest;
+import com.secondlife.backend.domain.dto.product.ProductUpdateRequest;
 import com.secondlife.backend.domain.dto.product.ProductDetailResponse;
 import com.secondlife.backend.domain.dto.product.ProductResponse;
 import com.secondlife.backend.domain.dto.product.SellerInfo;
@@ -17,9 +18,13 @@ import com.secondlife.backend.repository.ProductRepository;
 import com.secondlife.backend.repository.UserAccountRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -158,6 +163,105 @@ public class ProductService {
                 .map(this::convertToResponse);
     }
 
+    @Transactional
+    public ProductResponse updateProduct(Long productId, ProductUpdateRequest request, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + productId));
+
+        if (product.getSeller() == null || !product.getSeller().getId().equals(sellerId)) {
+            throw new RuntimeException("Bạn không có quyền cập nhật sản phẩm này");
+        }
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục (Category)"));
+
+        ListingType listingType;
+        try {
+            listingType = ListingType.valueOf(request.getListingType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Loại hình đăng không hợp lệ (Phải là SELL, RENT, hoặc SELL_AND_RENT)");
+        }
+
+        if (listingType == ListingType.SELL || listingType == ListingType.SELL_AND_RENT) {
+            if (request.getPrice() == null || request.getPrice().doubleValue() <= 0) {
+                throw new RuntimeException("Hình thức Bán yêu cầu phải nhập giá bán lớn hơn 0");
+            }
+        }
+        if (listingType == ListingType.RENT || listingType == ListingType.SELL_AND_RENT) {
+            if (request.getRentalPricePerDay() == null || request.getRentalPricePerDay().doubleValue() <= 0) {
+                throw new RuntimeException("Hình thức Thuê yêu cầu phải nhập giá thuê/ngày lớn hơn 0");
+            }
+        }
+
+        BigDecimal price = request.getPrice() != null ? request.getPrice() : BigDecimal.ZERO;
+        BigDecimal rentalPrice = request.getRentalPricePerDay() != null ? request.getRentalPricePerDay() : BigDecimal.ZERO;
+
+        if (listingType == ListingType.SELL) {
+            rentalPrice = BigDecimal.ZERO;
+        }
+        if (listingType == ListingType.RENT) {
+            price = BigDecimal.ZERO;
+        }
+
+        product.setTitle(request.getTitle());
+        product.setDescription(request.getDescription());
+        product.setPrice(price);
+        product.setRentalPricePerDay(rentalPrice);
+        product.setCondition(request.getCondition());
+        product.setLocation(request.getLocation());
+        product.setListingType(listingType);
+        product.setCategory(category);
+        if (request.getImages() != null) {
+            product.getImages().clear();
+            product.getImages().addAll(request.getImages());
+        }
+
+        Product savedProduct = productRepository.save(product);
+        return convertToResponse(savedProduct);
+    }
+
+    @Transactional
+    public void deleteProduct(Long productId, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + productId));
+
+        if (product.getSeller() == null || !product.getSeller().getId().equals(sellerId)) {
+            throw new RuntimeException("Bạn không có quyền xoá sản phẩm này");
+        }
+
+        if (product.getOrderItems() != null && !product.getOrderItems().isEmpty()) {
+            throw new RuntimeException("Không thể xoá sản phẩm đã có đơn hàng");
+        }
+
+        productRepository.delete(product);
+    }
+
+        /**
+         * Tìm kiếm sản phẩm theo bộ lọc và phân trang
+         */
+        @Transactional(readOnly = true)
+        public Page<ProductResponse> searchProducts(
+            String query,
+            Long categoryId,
+            String listingType,
+                String province,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Pageable pageable
+        ) {
+        Specification<Product> spec = buildSearchSpecification(
+            query,
+            categoryId,
+            listingType,
+                province,
+            minPrice,
+            maxPrice
+        );
+
+        return productRepository.findAll(spec, pageable)
+            .map(this::convertToResponse);
+        }
+
     /**
      * Convert Product entity sang ProductResponse DTO
      */
@@ -253,5 +357,141 @@ public class ProductService {
             .totalOrders(totalOrders)
             .rating(rating)
                 .build();
+    }
+
+    private Specification<Product> buildSearchSpecification(
+            String query,
+            Long categoryId,
+            String listingType,
+            String province,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(criteriaBuilder.equal(root.get("status"), ProductStatus.AVAILABLE));
+
+            if (query != null && !query.isBlank()) {
+                String likeQuery = "%" + query.trim().toLowerCase() + "%";
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("title")),
+                        likeQuery
+                ));
+            }
+
+            if (categoryId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), categoryId));
+            }
+
+            if (province != null && !province.isBlank()) {
+                String likeProvince = "%" + province.trim().toLowerCase() + "%";
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("location")),
+                        likeProvince
+                ));
+            }
+
+            List<ListingType> types = resolveListingTypes(listingType);
+            if (!types.isEmpty()) {
+                predicates.add(root.get("listingType").in(types));
+            }
+
+            if (minPrice != null || maxPrice != null) {
+                Predicate pricePredicate = buildPricePredicate(
+                        criteriaBuilder,
+                        root,
+                        listingType,
+                        minPrice,
+                        maxPrice
+                );
+                if (pricePredicate != null) {
+                    predicates.add(pricePredicate);
+                }
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private List<ListingType> resolveListingTypes(String listingType) {
+        List<ListingType> types = new ArrayList<>();
+        if (listingType == null || listingType.isBlank() || "all".equalsIgnoreCase(listingType)) {
+            return types;
+        }
+
+        String normalized = listingType.trim().toUpperCase();
+        if ("BUY".equals(normalized) || "SELL".equals(normalized)) {
+            types.add(ListingType.SELL);
+            types.add(ListingType.SELL_AND_RENT);
+        } else if ("RENT".equals(normalized)) {
+            types.add(ListingType.RENT);
+            types.add(ListingType.SELL_AND_RENT);
+        } else if ("BOTH".equals(normalized) || "SELL_AND_RENT".equals(normalized)) {
+            types.add(ListingType.SELL_AND_RENT);
+        }
+
+        return types;
+    }
+
+    private Predicate buildPricePredicate(
+            jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder,
+            jakarta.persistence.criteria.Root<Product> root,
+            String listingType,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        String normalized = listingType == null ? "" : listingType.trim().toUpperCase();
+        boolean isBuy = "BUY".equals(normalized) || "SELL".equals(normalized);
+        boolean isRent = "RENT".equals(normalized);
+        boolean isBoth = "BOTH".equals(normalized) || "SELL_AND_RENT".equals(normalized) || normalized.isBlank();
+
+        Predicate sellPredicate = buildRangePredicate(
+                criteriaBuilder,
+                root.get("price"),
+                minPrice,
+                maxPrice
+        );
+        Predicate rentPredicate = buildRangePredicate(
+                criteriaBuilder,
+                root.get("rentalPricePerDay"),
+                minPrice,
+                maxPrice
+        );
+
+        if (isBuy) {
+            return sellPredicate;
+        }
+
+        if (isRent) {
+            return rentPredicate;
+        }
+
+        if (isBoth) {
+            if (sellPredicate != null && rentPredicate != null) {
+                return criteriaBuilder.or(sellPredicate, rentPredicate);
+            }
+            return sellPredicate != null ? sellPredicate : rentPredicate;
+        }
+
+        return null;
+    }
+
+    private Predicate buildRangePredicate(
+            jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder,
+            jakarta.persistence.criteria.Path<BigDecimal> field,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
+        if (minPrice != null && maxPrice != null) {
+            return criteriaBuilder.between(field, minPrice, maxPrice);
+        }
+        if (minPrice != null) {
+            return criteriaBuilder.greaterThanOrEqualTo(field, minPrice);
+        }
+        if (maxPrice != null) {
+            return criteriaBuilder.lessThanOrEqualTo(field, maxPrice);
+        }
+        return null;
     }
 }

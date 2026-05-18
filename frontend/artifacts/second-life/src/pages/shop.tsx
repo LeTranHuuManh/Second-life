@@ -27,12 +27,12 @@ export default function Shop() {
   const { data: sellerProfile, isLoading: isLoadingProfile } =
     useSellerProfile(id);
 
-  const { data: products, isLoading } = useProducts();
+  const { data: productsPage, isLoading } = useProducts();
 
-  const filteredProducts = (products || []).filter((p) => {
+  const filteredProducts = (productsPage?.items || []).filter((p) => {
     const matchesCategory =
       selectedCategory === "all" || p.category === selectedCategory;
-    const productSellerId = p.sellerId ?? p.seller?.id;
+    const productSellerId = p.shop?.id;
     const matchesSeller =
       !id || !productSellerId || String(productSellerId) === String(id);
     return matchesCategory && matchesSeller;
@@ -53,7 +53,7 @@ export default function Shop() {
   return (
     <div className="w-full">
       {/* Shop Banner */}
-      <div className="relative h-40 md:h-56 overflow-hidden bg-gradient-to-r from-primary/20 to-secondary">
+      <div className="relative h-40 md:h-56 overflow-hidden bg-linear-to-r from-primary/20 to-secondary">
         <img
           src={shopCover}
           alt="Shop banner"
@@ -65,7 +65,7 @@ export default function Shop() {
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="bg-white rounded-3xl border border-border shadow-sm p-6 -mt-8 relative z-10 mb-6">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-            <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg flex-shrink-0">
+            <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg shrink-0">
               <AvatarImage src={shopAvatar} />
               <AvatarFallback className="bg-primary/20 text-primary text-xl">
                 {shopName[0] || "S"}
@@ -91,7 +91,7 @@ export default function Shop() {
                     {shopDescription}
                   </p>
                 </div>
-                <div className="flex gap-3 flex-shrink-0">
+                <div className="flex gap-3 shrink-0">
                   <Link href="/tin-nhan">
                     <Button variant="outline" className="rounded-full gap-2">
                       <MessageCircle className="h-4 w-4" /> Nhắn tin
@@ -126,7 +126,7 @@ export default function Shop() {
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 no-scrollbar">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
               selectedCategory === "all"
                 ? "bg-primary text-white border-primary shadow-sm"
                 : "bg-white text-muted-foreground border-border hover:border-primary hover:text-primary"
@@ -137,9 +137,9 @@ export default function Shop() {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setSelectedCategory(cat.name)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                selectedCategory === cat.name
+              onClick={() => setSelectedCategory(String(cat.id))}
+              className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                selectedCategory === String(cat.id)
                   ? "bg-primary text-white border-primary shadow-sm"
                   : "bg-white text-muted-foreground border-border hover:border-primary hover:text-primary"
               }`}

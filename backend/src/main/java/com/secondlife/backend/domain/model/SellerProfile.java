@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "seller_profiles")
@@ -22,6 +24,7 @@ public class SellerProfile extends BaseEntity {
     @OneToOne(optional = false)
     @MapsId
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount user;
 
     @Column(name = "shop_name", length = 150)

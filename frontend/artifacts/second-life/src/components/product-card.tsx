@@ -14,10 +14,14 @@ export function formatPrice(price: number | undefined) {
 interface ProductCardProps {
   product: {
     id: number | string;
-    title: string;
+    title?: string;
+    name?: string;
     listingType?: string;
+    type?: "buy" | "rent" | "both";
     price?: number | { toNumber?: () => number };
     rentalPricePerDay?: number | { toNumber?: () => number };
+    buyPrice?: number;
+    rentPricePerDay?: number;
     images?: string[];
     location?: string;
   };
@@ -32,10 +36,20 @@ export function ProductCard({ product }: ProductCardProps) {
       : Number(value);
   };
 
-  const price = getPrice(product.price);
-  const rentalPricePerDay = getPrice(product.rentalPricePerDay);
+  const price = getPrice(product.price ?? product.buyPrice);
+  const rentalPricePerDay = getPrice(
+    product.rentalPricePerDay ?? product.rentPricePerDay,
+  );
   const imageUrl =
     product.images?.[0] || `${import.meta.env.BASE_URL}images/placeholder.png`;
+  const productTitle = product.title || product.name || "Sản phẩm";
+  const listingType =
+    product.listingType ||
+    (product.type === "buy"
+      ? "SELL"
+      : product.type === "rent"
+        ? "RENT"
+        : "SELL_AND_RENT");
 
   return (
     <Link href={`/san-pham/${product.id}`} className="block group h-full">
@@ -43,15 +57,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="relative aspect-square overflow-hidden bg-secondary/30">
           <img
             src={imageUrl}
-            alt={product.title}
+            alt={productTitle}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             onError={(e) => {
               e.currentTarget.src = `${import.meta.env.BASE_URL}images/placeholder.png`;
             }}
           />
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            {(product.listingType === "SELL" ||
-              product.listingType === "SELL_AND_RENT") && (
+            {(listingType === "SELL" || listingType === "SELL_AND_RENT") && (
               <Badge
                 variant="secondary"
                 className="bg-white/90 backdrop-blur-sm text-emerald-700 hover:bg-white font-bold border-none shadow-sm"
@@ -59,8 +72,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 Mua
               </Badge>
             )}
-            {(product.listingType === "RENT" ||
-              product.listingType === "SELL_AND_RENT") && (
+            {(listingType === "RENT" || listingType === "SELL_AND_RENT") && (
               <Badge
                 variant="secondary"
                 className="bg-white/90 backdrop-blur-sm text-blue-700 hover:bg-white font-bold border-none shadow-sm"
@@ -73,7 +85,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-semibold text-foreground line-clamp-2 leading-tight mb-2 group-hover:text-primary transition-colors">
-            {product.title}
+            {productTitle}
           </h3>
 
           <div className="mt-auto space-y-2">
@@ -103,7 +115,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
             <div className="flex items-center justify-between pt-3 mt-1 border-t border-border/50">
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="w-3 h-3" />
+                <MapPin className="w-3 h-3 shrink-0" />
                 <span className="truncate max-w-[80px]">
                   {product.location || "Không rõ"}
                 </span>

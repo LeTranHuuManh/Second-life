@@ -9,19 +9,19 @@ import { ShieldCheck, Leaf, Clock, Map } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
-  const { data: products, isLoading } = useProducts();
+  const { data: productsPage, isLoading } = useProducts();
   const { data: categories = [] } = useCategories();
 
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative w-full h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden bg-primary/10">
+      <section className="relative w-full h-87.5 md:h-112.5 lg:h-125 overflow-hidden bg-primary/10">
         <img
           src={`${import.meta.env.BASE_URL}images/hero-banner.png`}
           alt="Hero background"
           className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-r from-primary/30 to-transparent"></div>
         <div className="absolute inset-0 flex items-center">
           <div className="container mx-auto px-4 z-10">
             <div className="max-w-xl space-y-6">
@@ -66,7 +66,7 @@ export default function Home() {
           {categories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/tim-kiem?category=${encodeURIComponent(cat.name)}`}
+              href={`/tim-kiem?category=${encodeURIComponent(String(cat.id))}`}
               className="snap-start shrink-0"
             >
               <div className="flex flex-col items-center gap-3 group w-20 md:w-24">
@@ -106,7 +106,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products?.slice(0, 8).map((p) => (
+            {productsPage?.items.slice(0, 8).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

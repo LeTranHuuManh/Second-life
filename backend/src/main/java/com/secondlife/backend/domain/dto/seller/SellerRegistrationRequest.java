@@ -13,4 +13,7 @@ public class SellerRegistrationRequest {
 
     @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
+
+    @NotBlank(message = "Mô tả cửa hàng không được để trống")
+    private String description;
 }

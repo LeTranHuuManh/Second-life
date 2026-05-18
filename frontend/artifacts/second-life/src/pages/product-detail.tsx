@@ -68,7 +68,7 @@ function ImageZoomModal({
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-[999] bg-black/90 flex flex-col items-center justify-center"
+      className="fixed inset-0 z-999 bg-black/90 flex flex-col items-center justify-center"
       onClick={onClose}
     >
       <button
@@ -580,7 +580,7 @@ function RentModal({
 export default function ProductDetail() {
   const { id } = useParams();
   const { data: product, isLoading } = useProduct(id!);
-  const { data: related } = useProducts({ category: product?.category });
+  const { data: relatedPage } = useProducts({ category: product?.category });
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -634,7 +634,7 @@ export default function ProductDetail() {
     );
   }
 
-  const related2 = (related ?? []).filter((p) => p.id !== product.id);
+  const related2 = (relatedPage?.items ?? []).filter((p) => p.id !== product.id);
   const shopName = product.shop.name;
   const shopAvatar = product.shop.avatar;
   const shopAddress = product.shop.address || "";
@@ -656,7 +656,7 @@ export default function ProductDetail() {
             {product.category}
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-foreground font-medium truncate max-w-[200px]">{product.name}</span>
+          <span className="text-foreground font-medium truncate max-w-50">{product.name}</span>
         </nav>
 
         {/* ── BLOCK 1: Images + Info ── */}

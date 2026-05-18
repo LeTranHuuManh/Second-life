@@ -16,6 +16,9 @@ public class SellerRegistrationResponse {
     private String shopName;
     private String phone;
     private String address;
+    private String description;
+    private String avatarUrl;
+    private String coverImageUrl;
     private RegistrationStatus status;
     private String adminNote;
     private LocalDateTime createdAt;

@@ -53,11 +53,30 @@ public class SellerOrderServiceImpl implements SellerOrderService {
 
         CustomerOrder parentOrder = item.getOrder();
 
-        if (parentOrder.getStatus() != OrderStatus.PENDING_PAYMENT && parentOrder.getStatus() != OrderStatus.PAID && parentOrder.getStatus() != OrderStatus.DEPOSITED) {
+        if (parentOrder.getStatus() != OrderStatus.PENDING) {
             throw new RuntimeException("Order is not ready for processing");
         }
 
-        parentOrder.setStatus(OrderStatus.SHIPPED);
+        parentOrder.setStatus(OrderStatus.PROCESSING);
+        customerOrderRepository.save(parentOrder);
+    }
+
+    @Override
+    @Transactional
+    public void updateOrderStatus(Long sellerId, Long orderItemId, OrderStatus status) {
+        if (status == null) {
+            throw new RuntimeException("Status is required");
+        }
+
+        OrderItem item = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new RuntimeException("OrderItem not found"));
+
+        if (!item.getProduct().getSeller().getId().equals(sellerId)) {
+            throw new RuntimeException("Seller does not own this item");
+        }
+
+        CustomerOrder parentOrder = item.getOrder();
+        parentOrder.setStatus(status);
         customerOrderRepository.save(parentOrder);
     }
 

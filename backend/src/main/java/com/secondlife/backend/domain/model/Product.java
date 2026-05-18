@@ -15,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -60,6 +61,7 @@ public class Product extends BaseEntity {
     private String location;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @org.hibernate.annotations.BatchSize(size = 20)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url", nullable = false, length = 1000)
     @OrderColumn(name = "position_no")
@@ -73,19 +75,23 @@ public class Product extends BaseEntity {
     @Column(name = "listing_type", length = 30)
     private com.secondlife.backend.domain.enums.ListingType listingType;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AiSuggestion> aiSuggestions = new HashSet<>();
 
     @OneToMany(mappedBy = "product")
+    @org.hibernate.annotations.BatchSize(size = 20)
     private Set<CartItem> cartItems = new HashSet<>();
 
     @OneToMany(mappedBy = "product")
+    @org.hibernate.annotations.BatchSize(size = 20)
     private Set<OrderItem> orderItems = new HashSet<>();
 
     @OneToMany(mappedBy = "product")
+    @org.hibernate.annotations.BatchSize(size = 20)
     private Set<Notification> notifications = new HashSet<>();
 
     @ManyToMany(mappedBy = "followedProducts")
+    @org.hibernate.annotations.BatchSize(size = 20)
     private Set<UserAccount> followers = new HashSet<>();
 
     public Long getId() {
@@ -178,6 +184,10 @@ public class Product extends BaseEntity {
 
     public Set<AiSuggestion> getAiSuggestions() {
         return aiSuggestions;
+    }
+
+    public Set<OrderItem> getOrderItems() {
+        return orderItems;
     }
 
     public Set<UserAccount> getFollowers() {

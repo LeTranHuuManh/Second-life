@@ -20,6 +20,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "orders")
@@ -31,6 +33,7 @@ public class CustomerOrder extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,7 +47,7 @@ public class CustomerOrder extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-    private OrderStatus status = OrderStatus.PENDING_PAYMENT;
+    private OrderStatus status = OrderStatus.PENDING;
 
     @Column(name = "payment_method", nullable = false, length = 40)
     private String paymentMethod = "PayOS";
@@ -52,7 +55,7 @@ public class CustomerOrder extends BaseEntity {
     @Column(name = "payment_at")
     private LocalDateTime paymentAt;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TransactionRecord> transactions = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

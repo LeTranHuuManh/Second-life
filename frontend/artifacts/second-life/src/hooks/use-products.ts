@@ -1,8 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getAvailableProducts,
+  searchProducts,
   getUserProducts,
   getProductById,
+  updateProduct,
+  deleteProduct,
+  type UpdateProductData,
 } from "@/lib/product";
 import { MOCK_PRODUCTS, Product } from "@/lib/mock-data";
 
@@ -17,11 +20,38 @@ export interface ProductFilters {
   query?: string;
   province?: string;
   sort?: SortOption;
+  minPrice?: number;
+  maxPrice?: number;
   page?: number;
   size?: number;
   /** @deprecated use listing_type */
   type?: string;
 }
+
+export interface ProductsPageResult {
+  items: Product[];
+  totalPages: number;
+  totalElements: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+type SearchProduct = Product & {
+  categoryId?: number;
+  listingType?: string;
+};
+
+const normalizeNumber = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const mapListingType = (listingType?: string): Product["type"] => {
+  if (listingType === "SELL") return "buy";
+  if (listingType === "RENT") return "rent";
+  return "both";
+};
 
 export function useProducts(filters?: ProductFilters) {
   const page = filters?.page ?? 0;
@@ -31,87 +61,76 @@ export function useProducts(filters?: ProductFilters) {
     queryKey: ["products", filters],
     queryFn: async () => {
       try {
-        // Gọi API từ backend để lấy sản phẩm có phân trang
-        const response = await getAvailableProducts(page, size);
-        let result = response.content || [];
+        const response = await searchProducts({
+          q: filters?.query,
+          categoryId: filters?.category ? Number(filters.category) : undefined,
+          listingType: filters?.listing_type,
+          province: filters?.province,
+          minPrice: filters?.minPrice,
+          maxPrice: filters?.maxPrice,
+          sort: filters?.sort,
+          page,
+          size,
+        });
 
-        // Áp dụng filter ở phía client
-        // listing_type filter (new canonical field)
-        const lt =
-          filters?.listing_type ?? (filters?.type as ListingType) ?? "all";
-        if (lt === "buy") {
-          result = result.filter(
-            (p) =>
-              p.listingType === "SELL" || p.listingType === "SELL_AND_RENT",
-          );
-        } else if (lt === "rent") {
-          result = result.filter(
-            (p) =>
-              p.listingType === "RENT" || p.listingType === "SELL_AND_RENT",
-          );
-        } else if (lt === "both") {
-          result = result.filter((p) => p.listingType === "SELL_AND_RENT");
-        }
+        const items: SearchProduct[] = (response.content || []).map(
+          (p: any) => {
+            const images =
+              Array.isArray(p.images) && p.images.length > 0
+                ? p.images
+                : ["/images/placeholder.png"];
 
-        // Category
-        if (filters?.category) {
-          result = result.filter(
-            (p) => p.categoryId === Number(filters.category),
-          );
-        }
-
-        // Province / location
-        if (filters?.province) {
-          result = result.filter((p) =>
-            p.location.toLowerCase().includes(filters.province!.toLowerCase()),
-          );
-        }
-
-        // Text query
-        if (filters?.query) {
-          const q = filters.query.toLowerCase();
-          result = result.filter(
-            (p) =>
-              p.title.toLowerCase().includes(q) ||
-              p.description.toLowerCase().includes(q),
-          );
-        }
-
-        // Sort
-        const sort = filters?.sort ?? "default";
-        if (sort === "price_asc") {
-          result.sort((a, b) => {
-            const pa = Math.min(
-              a.price?.toNumber() ?? Infinity,
-              a.rentalPricePerDay?.toNumber() ?? Infinity,
-            );
-            const pb = Math.min(
-              b.price?.toNumber() ?? Infinity,
-              b.rentalPricePerDay?.toNumber() ?? Infinity,
-            );
-            return pa - pb;
-          });
-        } else if (sort === "price_desc") {
-          result.sort((a, b) => {
-            const pa = Math.max(
-              a.price?.toNumber() ?? 0,
-              a.rentalPricePerDay?.toNumber() ?? 0,
-            );
-            const pb = Math.max(
-              b.price?.toNumber() ?? 0,
-              b.rentalPricePerDay?.toNumber() ?? 0,
-            );
-            return pb - pa;
-          });
-        } else if (sort === "distance") {
-          result.sort((a, b) => a.location.localeCompare(b.location));
-        }
-
-        return result;
+            return {
+              id: String(p.id),
+              name: p.title,
+              description: p.description || "",
+              category: p.categoryId ? String(p.categoryId) : "",
+              type: mapListingType(p.listingType),
+              buyPrice: normalizeNumber(p.price),
+              rentPricePerDay: normalizeNumber(p.rentalPricePerDay),
+              aiSuggestedBuyPrice: undefined,
+              aiSuggestedRentPrice: undefined,
+              images,
+              stock: 1,
+              status: p.status === "AVAILABLE" ? "available" : "sold",
+              shop: {
+                id: String(p.sellerId ?? ""),
+                name: p.sellerId ? `Shop ${p.sellerId}` : "Shop",
+                avatar: "https://i.pravatar.cc/150?img=11",
+                address: "",
+                joinedAt: "",
+                totalOrders: 0,
+                rating: 0,
+              },
+              location: p.location || "",
+              rating: 0,
+              reviewsCount: 0,
+              reviews: [],
+              categoryId: p.categoryId,
+              listingType: p.listingType,
+            } as SearchProduct;
+          },
+        );
+        return {
+          items,
+          totalPages: response.totalPages ?? response.page?.totalPages ?? 1,
+          totalElements:
+            response.totalElements ??
+            response.page?.totalElements ??
+            items.length,
+          pageNumber: response.number ?? response.page?.number ?? page,
+          pageSize: response.size ?? response.page?.size ?? size,
+        } as ProductsPageResult;
       } catch (error) {
         console.error("Lỗi khi lấy sản phẩm từ API:", error);
         // Fallback về mock data nếu API bị lỗi
-        return MOCK_PRODUCTS;
+        return {
+          items: MOCK_PRODUCTS,
+          totalPages: 1,
+          totalElements: MOCK_PRODUCTS.length,
+          pageNumber: 0,
+          pageSize: MOCK_PRODUCTS.length,
+        } as ProductsPageResult;
       }
     },
   });
@@ -137,6 +156,36 @@ export function useUserProducts(
         console.error("Lỗi khi lấy sản phẩm của người dùng:", error);
         return [];
       }
+    },
+  });
+}
+
+export function useUpdateUserProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      productId,
+      data,
+    }: {
+      productId: number;
+      data: UpdateProductData;
+    }) => {
+      return updateProduct(productId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProducts"] });
+    },
+  });
+}
+
+export function useDeleteUserProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (productId: number) => {
+      return deleteProduct(productId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProducts"] });
     },
   });
 }

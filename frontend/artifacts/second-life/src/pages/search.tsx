@@ -154,22 +154,22 @@ function SearchProductCard({ product }: { product: Product }) {
             {canBuy && (
               <Button
                 size="sm"
-                className="flex-1 rounded-full text-xs h-8 font-bold shadow-sm"
+                className="flex-1 rounded-full text-[10px] sm:text-xs h-8 font-bold shadow-sm px-2"
                 onClick={handleBuy}
               >
-                <ShoppingCart className="w-3 h-3 mr-1 shrink-0" />
-                Mua ngay
+                <ShoppingCart className="w-3 h-3 sm:mr-1 shrink-0 hidden sm:block" />
+                <span className="truncate">Mua</span>
               </Button>
             )}
             {canRent && (
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 rounded-full text-xs h-8 font-bold border-primary/60 text-primary hover:bg-primary hover:text-white transition-colors"
+                className="flex-1 rounded-full text-[10px] sm:text-xs h-8 font-bold border-primary/60 text-primary hover:bg-primary hover:text-white transition-colors px-2"
                 onClick={handleRent}
               >
-                <CalendarRange className="w-3 h-3 mr-1 shrink-0" />
-                Thuê ngay
+                <CalendarRange className="w-3 h-3 sm:mr-1 shrink-0 hidden sm:block" />
+                <span className="truncate">Thuê</span>
               </Button>
             )}
           </div>
@@ -251,6 +251,10 @@ interface FilterProps {
   setProvince: (v: string) => void;
   district: string;
   setDistrict: (v: string) => void;
+  minPrice: string;
+  setMinPrice: (v: string) => void;
+  maxPrice: string;
+  setMaxPrice: (v: string) => void;
   sort: SortOption;
   setSort: (v: SortOption) => void;
   category: string;
@@ -268,6 +272,10 @@ function FilterSidebar({
   setProvince,
   district,
   setDistrict,
+  minPrice,
+  setMinPrice,
+  maxPrice,
+  setMaxPrice,
   sort,
   setSort,
   category,
@@ -367,6 +375,32 @@ function FilterSidebar({
 
       <div className="border-t border-border/40" />
 
+      {/* Price range */}
+      <div>
+        <h3 className="font-bold text-sm mb-2.5 text-foreground flex items-center gap-1.5">
+          <SlidersHorizontal className="w-3.5 h-3.5 text-primary" />
+          Khoảng giá
+        </h3>
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            placeholder="Tối thiểu"
+            inputMode="numeric"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            className="rounded-xl text-sm h-9"
+          />
+          <Input
+            placeholder="Tối đa"
+            inputMode="numeric"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="rounded-xl text-sm h-9"
+          />
+        </div>
+      </div>
+
+      <div className="border-t border-border/40" />
+
       {/* Categories */}
       <div>
         <h3 className="font-bold text-sm mb-2.5 text-foreground flex items-center gap-1.5">
@@ -387,9 +421,9 @@ function FilterSidebar({
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setCategory(cat.name)}
+              onClick={() => setCategory(String(cat.id))}
               className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
-                category === cat.name
+                category === String(cat.id)
                   ? "bg-primary text-white font-semibold"
                   : "hover:bg-secondary text-muted-foreground hover:text-foreground"
               }`}
@@ -433,6 +467,8 @@ export default function Search() {
   const [searchInput, setSearchInput] = useState(initQ);
   const [province, setProvince] = useState("");
   const [district, setDistrict] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState<SortOption>("default");
   const [page, setPage] = useState(1);
   const [mobileSidebar, setMobileSidebar] = useState(false);
@@ -442,12 +478,16 @@ export default function Search() {
     getCategories().then(setCategories).catch(console.error);
   }, []);
 
-  const { data: products, isLoading } = useProducts({
+  const { data: productsPage, isLoading } = useProducts({
     listing_type: listingType,
     category,
     query,
     province,
     sort,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    page: Math.max(page - 1, 0),
+    size: PAGE_SIZE,
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -486,6 +526,8 @@ export default function Search() {
     setSearchInput("");
     setProvince("");
     setDistrict("");
+    setMinPrice("");
+    setMaxPrice("");
     setSort("default");
     setPage(1);
     setMobileSidebar(false);
@@ -495,15 +537,16 @@ export default function Search() {
     !!query ||
     !!category ||
     !!province ||
+    !!minPrice ||
+    !!maxPrice ||
     sort !== "default" ||
     listingType !== "all";
 
-  // Client-side pagination
-  const totalPages = Math.ceil((products?.length ?? 0) / PAGE_SIZE);
+  // Server-side pagination
+  const totalPages = productsPage?.totalPages ?? 1;
   const paginated = useMemo(() => {
-    if (!products) return [];
-    return products.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  }, [products, page]);
+    return productsPage?.items ?? [];
+  }, [productsPage]);
 
   const goToPage = (p: number) => {
     setPage(p);
@@ -518,6 +561,10 @@ export default function Search() {
     setProvince: handleProvince,
     district,
     setDistrict,
+    minPrice,
+    setMinPrice,
+    maxPrice,
+    setMaxPrice,
     sort,
     setSort: handleSort,
     category,
@@ -526,6 +573,10 @@ export default function Search() {
     onClear: clearAll,
     hasActive,
   };
+
+  const selectedCategory = categories.find(
+    (cat) => String(cat.id) === category,
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -547,7 +598,7 @@ export default function Search() {
                 <p className="text-sm text-muted-foreground mt-0.5">
                   {isLoading
                     ? "Đang tải..."
-                    : `${products?.length ?? 0} sản phẩm`}
+                    : `${productsPage?.totalElements ?? 0} sản phẩm`}
                 </p>
               </div>
 
@@ -615,12 +666,10 @@ export default function Search() {
                     className="rounded-full gap-1 pl-3 pr-2 py-1"
                   >
                     <CategoryIcon
-                      iconName={
-                        categories.find((c) => c.name === category)?.icon
-                      }
+                      iconName={selectedCategory?.icon}
                       className="w-3 h-3 mr-1"
                     />
-                    {category}
+                    {selectedCategory?.name || category}
                     <button
                       onClick={() => setCategory("")}
                       className="ml-0.5 hover:text-destructive"
@@ -685,7 +734,7 @@ export default function Search() {
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <div key={i} className="space-y-3">
-                    <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
+                    <Skeleton className="aspect-4/3 w-full rounded-2xl" />
                     <Skeleton className="h-4 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                     <Skeleton className="h-8 w-full rounded-full" />

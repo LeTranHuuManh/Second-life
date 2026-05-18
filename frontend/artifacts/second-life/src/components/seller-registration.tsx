@@ -17,7 +17,10 @@ export function SellerRegistration() {
     shopName: "",
     phone: "",
     address: "",
+    description: "",
   });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const checkStatus = async () => {
     try {
@@ -42,11 +45,18 @@ export function SellerRegistration() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.shopName || !formData.phone || !formData.address) {
+    if (
+      !formData.shopName ||
+      !formData.phone ||
+      !formData.address ||
+      !formData.description ||
+      !avatarFile ||
+      !coverFile
+    ) {
       toast({
         title: "Vui lòng điền đầy đủ",
         description:
-          "Các trường Tên shop, Số điện thoại, Địa chỉ không được để trống",
+          "Các trường Tên shop, Số điện thoại, Địa chỉ, Mô tả, Avatar và Ảnh bìa không được để trống",
         variant: "destructive",
       });
       return;
@@ -54,9 +64,17 @@ export function SellerRegistration() {
 
     try {
       setSubmitting(true);
+      const payload = new FormData();
+      payload.append("shopName", formData.shopName);
+      payload.append("phone", formData.phone);
+      payload.append("address", formData.address);
+      payload.append("description", formData.description);
+      payload.append("avatar", avatarFile);
+      payload.append("coverImage", coverFile);
+
       await apiFetch("/seller-requests/register", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: payload,
       });
       toast({
         title: "Đăng ký thành công",
@@ -85,7 +103,7 @@ export function SellerRegistration() {
 
   if (status === "PENDING") {
     return (
-      <div className="bg-white p-8 rounded-3xl border border-amber-200 bg-amber-50/50 shadow-sm max-w-2xl mx-auto mt-10 text-center">
+      <div className="bg-amber-50/50 p-8 rounded-3xl border border-amber-200 shadow-sm max-w-2xl mx-auto mt-10 text-center">
         <h2 className="text-2xl font-display font-bold text-amber-700 mb-4">
           Đang chờ xét duyệt
         </h2>
@@ -113,7 +131,7 @@ export function SellerRegistration() {
 
   if (status === "APPROVED") {
     return (
-      <div className="bg-white p-8 rounded-3xl border border-emerald-200 bg-emerald-50/50 shadow-sm max-w-2xl mx-auto mt-10 text-center">
+      <div className="bg-emerald-50/50 p-8 rounded-3xl border border-emerald-200 shadow-sm max-w-2xl mx-auto mt-10 text-center">
         <h2 className="text-2xl font-display font-bold text-emerald-700 mb-4">
           Chúc mừng! Yêu cầu đã được duyệt
         </h2>
@@ -188,7 +206,42 @@ export function SellerRegistration() {
             onChange={(e) =>
               setFormData({ ...formData, address: e.target.value })
             }
-            className="rounded-xl min-h-[100px]"
+            className="rounded-xl min-h-25"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Mô tả cửa hàng
+          </label>
+          <Textarea
+            placeholder="Giới thiệu về cửa hàng của bạn..."
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            className="rounded-xl min-h-30"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Ảnh đại diện cửa hàng
+          </label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+            className="rounded-xl h-11"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Ảnh bìa cửa hàng
+          </label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+            className="rounded-xl h-11"
           />
         </div>
 

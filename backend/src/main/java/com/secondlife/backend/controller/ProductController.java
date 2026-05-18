@@ -3,12 +3,14 @@ package com.secondlife.backend.controller;
 import com.secondlife.backend.domain.dto.product.ProductCreateRequest;
 import com.secondlife.backend.domain.dto.product.ProductDetailResponse;
 import com.secondlife.backend.domain.dto.product.ProductResponse;
+import com.secondlife.backend.domain.dto.product.ProductUpdateRequest;
 import com.secondlife.backend.service.CloudinaryService;
 import com.secondlife.backend.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -108,6 +110,36 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+        /**
+         * API Tìm kiếm sản phẩm (public, phân trang)
+         * Query params: q, categoryId, listingType, minPrice, maxPrice, sort, page, size
+         */
+        @GetMapping("/search")
+        public ResponseEntity<Page<ProductResponse>> searchProducts(
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "listingType", required = false) String listingType,
+                @RequestParam(value = "province", required = false) String province,
+            @RequestParam(value = "minPrice", required = false) java.math.BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(value = "sort", defaultValue = "default") String sort,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size
+        ) {
+        Sort sortSpec = buildSort(sort, listingType);
+        Pageable pageable = PageRequest.of(page, size, sortSpec);
+        Page<ProductResponse> products = productService.searchProducts(
+            query,
+            categoryId,
+            listingType,
+                province,
+            minPrice,
+            maxPrice,
+            pageable
+        );
+        return ResponseEntity.ok(products);
+        }
+
     /**
      * API Lấy danh sách sản phẩm của người dùng (quản lý bán hàng, phân trang)
      * Query params: page (mặc định 0), size (mặc định 20)
@@ -121,5 +153,64 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductResponse> userProducts = productService.getUserProducts(userId, pageable);
         return ResponseEntity.ok(userProducts);
+    }
+
+    /**
+     * API Cập nhật sản phẩm (Seller/Admin)
+     */
+    @PutMapping("/{productId}")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable("productId") Long productId,
+            @Valid @RequestBody ProductUpdateRequest request
+    ) {
+        Long currentUserId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ProductResponse response = productService.updateProduct(productId, request, currentUserId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * API Xoa san pham (Seller/Admin)
+     */
+    @DeleteMapping("/{productId}")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<?> deleteProduct(@PathVariable("productId") Long productId) {
+        Long currentUserId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        productService.deleteProduct(productId, currentUserId);
+        return ResponseEntity.ok(Map.of("message", "Deleted"));
+    }
+
+    private Sort buildSort(String sort, String listingType) {
+        if (sort == null || sort.isBlank() || "default".equalsIgnoreCase(sort)) {
+            return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+
+        if ("price_asc".equalsIgnoreCase(sort) || "price_desc".equalsIgnoreCase(sort)) {
+            Sort.Direction direction = "price_asc".equalsIgnoreCase(sort)
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC;
+
+            String property = resolvePriceSortField(listingType);
+            return Sort.by(direction, property).and(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+
+        if ("distance".equalsIgnoreCase(sort)) {
+            return Sort.by(Sort.Direction.ASC, "location").and(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+
+        return Sort.by(Sort.Direction.DESC, "createdAt");
+    }
+
+    private String resolvePriceSortField(String listingType) {
+        if (listingType == null) {
+            return "price";
+        }
+
+        String normalized = listingType.trim().toUpperCase();
+        if ("RENT".equals(normalized)) {
+            return "rentalPricePerDay";
+        }
+
+        return "price";
     }
 }

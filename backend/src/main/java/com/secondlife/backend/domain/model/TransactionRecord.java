@@ -14,6 +14,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "transactions")
@@ -25,6 +27,7 @@ public class TransactionRecord {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private CustomerOrder order;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)

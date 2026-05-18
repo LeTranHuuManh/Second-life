@@ -2,6 +2,7 @@ package com.secondlife.backend.controller.user;
 
 import com.secondlife.backend.common.response.BaseResponse;
 import com.secondlife.backend.domain.dto.seller.SellerOrderResponse;
+import com.secondlife.backend.domain.dto.seller.UpdateOrderStatusRequest;
 import com.secondlife.backend.service.seller.SellerOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -46,5 +47,15 @@ public class SellerOrderController {
         Long sellerId = getCurrentUserId();
         sellerOrderService.approveOrder(sellerId, orderItemId);
         return ResponseEntity.ok(BaseResponse.success("Order approved successfully"));
+    }
+
+    @PutMapping("/{orderItemId}/status")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<BaseResponse<String>> updateOrderStatus(
+            @PathVariable Long orderItemId,
+            @RequestBody UpdateOrderStatusRequest request) {
+        Long sellerId = getCurrentUserId();
+        sellerOrderService.updateOrderStatus(sellerId, orderItemId, request.getStatus());
+        return ResponseEntity.ok(BaseResponse.success("Order status updated successfully"));
     }
 }

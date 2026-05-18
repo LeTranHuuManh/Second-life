@@ -14,10 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -38,13 +40,15 @@ public class SellerRegistrationController {
         return null;
     }
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BaseResponse<SellerRegistrationResponse>> register(
-            @Valid @RequestBody SellerRegistrationRequest requestBody,
+            @Valid @ModelAttribute SellerRegistrationRequest requestBody,
+            @RequestParam("avatar") MultipartFile avatar,
+            @RequestParam("coverImage") MultipartFile coverImage,
             HttpServletRequest request) {
         Long userId = getUserIdFromRequest(request);
-        SellerRegistrationResponse response = sellerRegistrationService.createRegistration(userId, requestBody);
+        SellerRegistrationResponse response = sellerRegistrationService.createRegistration(userId, requestBody, avatar, coverImage);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success("Gửi yêu cầu đăng ký thành công", response));
     }

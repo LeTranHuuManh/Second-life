@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "user_profiles")
@@ -22,6 +24,7 @@ public class UserProfile extends BaseEntity {
     @OneToOne(optional = false)
     @MapsId
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount user;
 
     @Column(name = "full_name", nullable = false, length = 150)

@@ -45,16 +45,16 @@ public class UserAccount extends BaseEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private SellerProfile sellerProfile;
 
-    @OneToMany(mappedBy = "seller")
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Product> postedProducts = new HashSet<>();
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CustomerOrder> orders = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Notification> notifications = new HashSet<>();
 
     @ManyToMany
