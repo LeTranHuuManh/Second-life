@@ -1,6 +1,7 @@
 package com.secondlife.backend.service.seller;
 
 import com.secondlife.backend.domain.dto.seller.ShopProfileResponse;
+import com.secondlife.backend.domain.dto.seller.ShopProfileUpdateRequest;
 import com.secondlife.backend.domain.model.SellerProfile;
 import com.secondlife.backend.domain.model.UserAccount;
 import com.secondlife.backend.domain.model.UserProfile;
@@ -58,7 +59,7 @@ public class SellerProfileService {
     @Transactional
     public ShopProfileResponse updateProfile(
             Long sellerId,
-            String description,
+            ShopProfileUpdateRequest request,
             MultipartFile avatar,
             MultipartFile coverImage
     ) throws IOException {
@@ -68,8 +69,21 @@ public class SellerProfileService {
         SellerProfile profile = sellerProfileRepository.findByUserId(sellerId)
                 .orElseGet(() -> createDefaultProfile(user));
 
-        if (description != null) {
-            profile.setDescription(description.trim());
+        if (request.getDescription() != null) {
+            profile.setDescription(request.getDescription());
+        }
+        
+        if (request.getShopName() != null && !request.getShopName().trim().isEmpty()) {
+            profile.setShopName(request.getShopName());
+        }
+
+        if (request.getAddress() != null) {
+            profile.setAddress(request.getAddress());
+        }
+
+        if (request.getPhone() != null && user.getProfile() != null) {
+            user.getProfile().setPhone(request.getPhone());
+            userAccountRepository.save(user); // Also saves UserProfile dynamically due to cascade
         }
 
         if (avatar != null && !avatar.isEmpty()) {
@@ -130,12 +144,15 @@ public class SellerProfileService {
         String address = profile != null && StringUtils.hasText(profile.getAddress())
                 ? profile.getAddress()
                 : userProfile != null ? userProfile.getAddress() : null;
+                
+        String phone = userProfile != null ? userProfile.getPhone() : null;
 
         String joinedDate = formatJoinedDate(profile, userProfile);
 
         return ShopProfileResponse.builder()
                 .id(user.getId())
                 .name(name)
+                .phone(phone)
                 .avatar(avatar)
                 .coverImage(coverImage)
                 .address(address)
