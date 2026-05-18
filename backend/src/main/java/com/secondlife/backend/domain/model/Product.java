@@ -60,6 +60,9 @@ public class Product extends BaseEntity {
     @Column(name = "location", length = 255)
     private String location;
 
+    @Column(name = "stocks")
+    private Integer stocks;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @org.hibernate.annotations.BatchSize(size = 20)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
@@ -152,6 +155,14 @@ public class Product extends BaseEntity {
 
     public void setCondition(String condition) {
         this.condition = condition;
+    }
+
+    public Integer getStocks() {
+        return stocks;
+    }
+
+    public void setStocks(Integer stocks) {
+        this.stocks = stocks;
     }
 
     public String getLocation() {

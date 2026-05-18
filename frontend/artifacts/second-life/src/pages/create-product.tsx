@@ -84,6 +84,7 @@ export default function CreateProductPage() {
     rentalPricePerDay: string;
     condition: string;
     location: string;
+    stocks: string;
     listingType: string;
     categoryId: string;
   }>({
@@ -93,6 +94,7 @@ export default function CreateProductPage() {
     rentalPricePerDay: "",
     condition: "Like New",
     location: "Hà Nội",
+    stocks: "1",
     listingType: "SELL", // Mặc định là bán
     categoryId: "1", // Mặc định danh mục đầu tiên
   });
@@ -206,6 +208,7 @@ export default function CreateProductPage() {
             : Number(formData.rentalPricePerDay) || 0,
         condition: formData.condition,
         location: formData.location,
+        stocks: Number(formData.stocks) || 1,
         categoryId: Number(formData.categoryId),
       };
 
@@ -362,6 +365,19 @@ export default function CreateProductPage() {
           </div>
         </div>
 
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Số lượng (Stocks)
+            </label>
+            <Input
+              type="number"
+              min="1"
+              name="stocks"
+              value={formData.stocks}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
         <div>
           <label className="block text-sm font-medium mb-1">Danh mục *</label>
           <select

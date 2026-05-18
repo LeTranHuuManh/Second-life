@@ -16,6 +16,7 @@ public class ProductDetailResponse {
     private BigDecimal rentalPricePerDay;
     private String condition;
     private String location;
+    private Integer stocks;
     private String listingType;
     private String status;
     private Long categoryId;

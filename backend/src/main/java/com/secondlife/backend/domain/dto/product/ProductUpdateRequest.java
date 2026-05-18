@@ -23,6 +23,7 @@ public class ProductUpdateRequest {
     private String condition;
 
     private String location;
+    private Integer stocks;
 
     @NotBlank(message = "Loai hinh dang (Ban / Cho thue / Ca hai) khong duoc de trong")
     private String listingType;

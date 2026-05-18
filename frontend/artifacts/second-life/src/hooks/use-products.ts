@@ -91,7 +91,7 @@ export function useProducts(filters?: ProductFilters) {
               aiSuggestedBuyPrice: undefined,
               aiSuggestedRentPrice: undefined,
               images,
-              stock: 1,
+              stocks: 1,
               status: p.status === "AVAILABLE" ? "available" : "sold",
               shop: {
                 id: String(p.sellerId ?? ""),
@@ -210,7 +210,7 @@ export function useProduct(id: string) {
               : product.listingType === "RENT"
                 ? "rent"
                 : "both",
-          stock: 1,
+          stocks: product.stocks ?? 1,
           images:
             product.images && product.images.length > 0
               ? product.images

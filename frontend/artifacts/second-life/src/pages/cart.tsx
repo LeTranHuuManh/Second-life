@@ -82,8 +82,8 @@ export default function Cart() {
   const changeQty = (item: CartItem, delta: number) => {
     const s = get(item.id);
     const next = Math.max(1, s.buyQty + delta);
-    if (next > item.product.stock) {
-      update(item.id, { qtyError: `Chỉ còn ${item.product.stock} sản phẩm trong kho` });
+    if (next > item.product.stocks) {
+      update(item.id, { qtyError: `Chỉ còn ${item.product.stocks} sản phẩm trong kho` });
     } else {
       update(item.id, { buyQty: next, qtyError: null });
     }
@@ -251,7 +251,7 @@ export default function Cart() {
                               variant="outline"
                               size="icon"
                               className="h-7 w-7 rounded-lg"
-                              disabled={!s.buyChecked || s.buyQty >= item.product.stock}
+                              disabled={!s.buyChecked || s.buyQty >= item.product.stocks}
                               onClick={() => changeQty(item, +1)}
                             >
                               <Plus className="w-3 h-3" />
