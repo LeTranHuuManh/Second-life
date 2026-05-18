@@ -157,10 +157,6 @@ export default function Dashboard() {
       {
         onSuccess: () => {
           setEditShopOpen(false);
-          // Update local auth context if user name changed and seller has the same name
-          if (user && editShopForm.name !== user.name) {
-            login({ ...user, name: editShopForm.name });
-          }
         },
       },
     );
@@ -856,22 +852,22 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Số lượng (Stocks)
-                    </label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={editForm.stocks}
-                      onChange={(e) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          stocks: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Số lượng (Stocks)
+                  </label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={editForm.stocks}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        stocks: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
