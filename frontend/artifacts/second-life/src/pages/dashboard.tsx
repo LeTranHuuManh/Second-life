@@ -178,6 +178,7 @@ export default function Dashboard() {
     rentalPricePerDay: "",
     condition: "Like New",
     location: "",
+    stocks: "1",
     listingType: "SELL",
     categoryId: "",
   });
@@ -216,6 +217,7 @@ export default function Dashboard() {
         : "",
       condition: product.condition || "Like New",
       location: product.location || "",
+      stocks: product.stocks != null ? String(product.stocks) : "1",
       listingType: product.listingType || "SELL",
       categoryId: product.categoryId ? String(product.categoryId) : "",
     });
@@ -270,6 +272,7 @@ export default function Dashboard() {
               : Number(editForm.rentalPricePerDay) || 0,
           condition: editForm.condition,
           location: editForm.location,
+          stocks: Number(editForm.stocks) || 1,
           categoryId: Number(editForm.categoryId),
           images: existingImages,
         },
@@ -853,6 +856,22 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Số lượng (Stocks)
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={editForm.stocks}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          stocks: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">

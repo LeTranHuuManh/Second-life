@@ -31,7 +31,7 @@ export interface Product {
   aiSuggestedBuyPrice?: number;
   aiSuggestedRentPrice?: number;
   images: string[];
-  stock: number;
+  stocks: number;
   status: ProductStatus;
   shop: Shop;
   location: string;
@@ -85,7 +85,7 @@ export const MOCK_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800&q=80",
       "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -121,7 +121,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"
     ],
-    stock: 2,
+    stocks: 2,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",
@@ -140,7 +140,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1504280390224-b1f4864f1d69?w=800&q=80"
     ],
-    stock: 5,
+    stocks: 5,
     status: "available",
     shop: SHOP_DN,
     location: "Đà Nẵng",
@@ -161,7 +161,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1515347619152-16b110a2f7c0?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -180,7 +180,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",
@@ -201,7 +201,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_DN,
     location: "Đà Nẵng",
@@ -220,7 +220,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&q=80"
     ],
-    stock: 2,
+    stocks: 2,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -239,7 +239,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1559058789-672da06263d8?w=800&q=80"
     ],
-    stock: 3,
+    stocks: 3,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",
@@ -259,7 +259,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -278,7 +278,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1585515320310-259814833e62?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_DN,
     location: "Đà Nẵng",
@@ -297,7 +297,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",
@@ -318,7 +318,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -337,7 +337,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1540991323689-4a0cbeb3e7ba?w=800&q=80"
     ],
-    stock: 2,
+    stocks: 2,
     status: "available",
     shop: SHOP_DN,
     location: "Đà Nẵng",
@@ -356,7 +356,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",
@@ -375,7 +375,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -394,7 +394,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1584947897558-4e2b0c0e18e2?w=800&q=80"
     ],
-    stock: 3,
+    stocks: 3,
     status: "available",
     shop: SHOP_DN,
     location: "Đà Nẵng",
@@ -414,7 +414,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",
@@ -433,7 +433,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: MOCK_SHOP,
     location: "TP. Hồ Chí Minh",
@@ -452,7 +452,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80"
     ],
-    stock: 2,
+    stocks: 2,
     status: "available",
     shop: SHOP_DN,
     location: "Đà Nẵng",
@@ -471,7 +471,7 @@ export const MOCK_PRODUCTS: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1580674285054-bed31e145f59?w=800&q=80"
     ],
-    stock: 1,
+    stocks: 1,
     status: "available",
     shop: SHOP_HN,
     location: "Hà Nội",

@@ -81,6 +81,7 @@ public class ProductService {
         
         product.setCondition(request.getCondition());
         product.setLocation(request.getLocation());
+        product.setStocks(request.getStocks() != null ? request.getStocks() : 1);
         product.setListingType(listingType);
         product.setStatus(ProductStatus.AVAILABLE);
 
@@ -209,6 +210,7 @@ public class ProductService {
         product.setRentalPricePerDay(rentalPrice);
         product.setCondition(request.getCondition());
         product.setLocation(request.getLocation());
+        product.setStocks(request.getStocks() != null ? request.getStocks() : 1);
         product.setListingType(listingType);
         product.setCategory(category);
         if (request.getImages() != null) {
@@ -274,6 +276,7 @@ public class ProductService {
                 .rentalPricePerDay(product.getRentalPricePerDay())
                 .condition(product.getCondition())
                 .location(product.getLocation())
+                .stocks(product.getStocks())
                 .listingType(product.getListingType() != null ? product.getListingType().name() : null)
                 .status(product.getStatus().name())
                 .categoryId(product.getCategory().getId())
@@ -291,6 +294,7 @@ public class ProductService {
                 .rentalPricePerDay(product.getRentalPricePerDay())
                 .condition(product.getCondition())
                 .location(product.getLocation())
+                .stocks(product.getStocks())
                 .listingType(product.getListingType() != null ? product.getListingType().name() : null)
                 .status(product.getStatus().name())
                 .categoryId(product.getCategory().getId())

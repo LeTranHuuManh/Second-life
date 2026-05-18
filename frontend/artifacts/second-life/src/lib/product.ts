@@ -7,6 +7,7 @@ export interface CreateProductData {
   rentalPricePerDay?: number;
   condition: string;
   location: string;
+  stocks?: number;
   listingType: string; // "SELL", "RENT", "SELL_AND_RENT"
   categoryId: number;
   images?: string[];
@@ -19,6 +20,7 @@ export interface UpdateProductData {
   rentalPricePerDay?: number;
   condition: string;
   location: string;
+  stocks?: number;
   listingType: string; // "SELL", "RENT", "SELL_AND_RENT"
   categoryId: number;
   images?: string[];

@@ -23,6 +23,7 @@ public class ProductCreateRequest {
     private String condition;
     
     private String location;
+    private Integer stocks;
     
     @NotBlank(message = "Loại hình đăng (Bán / Cho thuê / Cả hai) không được để trống")
     private String listingType;
