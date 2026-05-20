@@ -34,4 +34,13 @@ public class AdminUserService {
                     .build();
         });
     }
+
+    @Transactional
+    public void toggleUserStatus(Long userId) {
+        UserAccount user = userAccountRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
+        
+        user.setIsActive(!Boolean.TRUE.equals(user.getIsActive()));
+        userAccountRepository.save(user);
+    }
 }
