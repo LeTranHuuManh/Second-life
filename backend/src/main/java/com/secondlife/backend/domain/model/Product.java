@@ -63,6 +63,12 @@ public class Product extends BaseEntity {
     @Column(name = "stocks")
     private Integer stocks;
 
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+
+    @Column(name = "review_count")
+    private Integer reviewCount = 0;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @org.hibernate.annotations.BatchSize(size = 20)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
@@ -96,6 +102,9 @@ public class Product extends BaseEntity {
     @ManyToMany(mappedBy = "followedProducts")
     @org.hibernate.annotations.BatchSize(size = 20)
     private Set<UserAccount> followers = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductRating> productRatings = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -163,6 +172,22 @@ public class Product extends BaseEntity {
 
     public void setStocks(Integer stocks) {
         this.stocks = stocks;
+    }
+
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
     }
 
     public String getLocation() {

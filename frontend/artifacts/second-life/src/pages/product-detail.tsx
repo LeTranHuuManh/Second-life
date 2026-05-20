@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { useProduct, useProducts } from "@/hooks/use-products";
+import { useRatings, useSubmitProductRating } from "@/hooks/use-ratings";
+import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/context";
 import { formatPrice, ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +50,44 @@ function formatTimeAgo(dateStr: string) {
   if (months < 12) return `${months} tháng trước`;
   const years = Math.floor(months / 12);
   return `${years} năm trước`;
+}
+
+function StarPicker({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  const [hover, setHover] = useState(0);
+  const LABELS = ["", "Rất tệ", "Tệ", "Bình thường", "Tốt", "Rất tốt"];
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            onMouseEnter={() => setHover(n)}
+            onMouseLeave={() => setHover(0)}
+            className="focus:outline-none transition-transform hover:scale-110"
+          >
+            <Star
+              className={`w-9 h-9 transition-colors ${
+                n <= (hover || value)
+                  ? "fill-amber-400 text-amber-400"
+                  : "fill-muted text-muted-foreground/30"
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+      <span className="text-sm font-medium text-muted-foreground h-5">
+        {LABELS[hover || value] ?? ""}
+      </span>
+    </div>
+  );
 }
 
 function StarRow({ rating, size = 5 }: { rating: number; size?: number }) {
@@ -670,6 +710,50 @@ export default function ProductDetail() {
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [isRentModalOpen, setIsRentModalOpen] = useState(false);
 
+  // Authentication & Ratings
+  const userStr = localStorage.getItem("second_life_user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  const currentUserId = user?.id;
+
+  const { data: realRatings = [] } = useRatings(Number(id));
+  const { mutate: submitRating, isPending: isSubmittingRating } =
+    useSubmitProductRating();
+
+  const userExistingRating = realRatings.find(
+    (r) => r.userId === currentUserId,
+  );
+  const [ratingVal, setRatingVal] = useState(0);
+  const [commentVal, setCommentVal] = useState("");
+
+  useEffect(() => {
+    if (userExistingRating) {
+      setRatingVal(userExistingRating.rating);
+      setCommentVal(userExistingRating.comment || "");
+    }
+  }, [userExistingRating]);
+
+  const handleRatingSubmit = () => {
+    if (ratingVal === 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng chọn số sao",
+        variant: "destructive",
+      });
+      return;
+    }
+    submitRating(
+      { productId: Number(id), rating: ratingVal, comment: commentVal },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Thành công",
+            description: "Cập nhật đánh giá thành công!",
+          });
+        },
+      },
+    );
+  };
+
   const handleBuyConfirm = (qty: number) => {
     addToCart({ product: product!, type: "buy", quantity: qty });
     setIsBuyModalOpen(false);
@@ -956,21 +1040,73 @@ export default function ProductDetail() {
                 Đánh giá sản phẩm
               </h3>
 
+              {/* Form Đánh giá cho người dùng hiện tại */}
+              {currentUserId && (
+                <div className="mb-8 p-5 bg-secondary/20 rounded-2xl border border-border/50">
+                  <h4 className="font-semibold mb-3">
+                    {userExistingRating ? "Đánh giá của bạn" : "Viết đánh giá"}
+                  </h4>
+                  <div className="flex gap-4 items-start">
+                    <StarPicker value={ratingVal} onChange={setRatingVal} />
+                    <div className="flex-1 space-y-3">
+                      <Textarea
+                        placeholder="Mô tả trải nghiệm của bạn về sản phẩm này..."
+                        value={commentVal}
+                        onChange={(e) => setCommentVal(e.target.value)}
+                        className="resize-none h-20"
+                      />
+                      <Button
+                        onClick={handleRatingSubmit}
+                        disabled={isSubmittingRating || ratingVal === 0}
+                        className="w-full sm:w-auto"
+                      >
+                        {isSubmittingRating ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Star className="w-4 h-4 mr-2" />
+                        )}
+                        {userExistingRating
+                          ? "Cập nhật đánh giá"
+                          : "Gửi đánh giá"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Average */}
               <div className="flex items-center gap-5 bg-secondary/30 rounded-2xl p-5 mb-6">
                 <div className="text-center">
                   <p className="text-5xl font-bold text-primary">
-                    {product.rating}
+                    {realRatings.length > 0
+                      ? (
+                          realRatings.reduce((a, b) => a + b.rating, 0) /
+                          realRatings.length
+                        ).toFixed(1)
+                      : product.rating}
                   </p>
-                  <StarRow rating={product.rating} size={18} />
+                  <StarRow
+                    rating={
+                      realRatings.length > 0
+                        ? realRatings.reduce((a, b) => a + b.rating, 0) /
+                          realRatings.length
+                        : product.rating
+                    }
+                    size={18}
+                  />
                   <p className="text-xs text-muted-foreground mt-1">
-                    {product.reviewsCount} đánh giá
+                    {realRatings.length} đánh giá
                   </p>
                 </div>
                 <div className="flex-1 space-y-1.5">
                   {[5, 4, 3, 2, 1].map((star) => {
+                    const count = realRatings.filter(
+                      (r) => r.rating === star,
+                    ).length;
                     const pct =
-                      star === 5 ? 72 : star === 4 ? 20 : star === 3 ? 5 : 2;
+                      realRatings.length > 0
+                        ? Math.round((count / realRatings.length) * 100)
+                        : 0;
                     return (
                       <div
                         key={star}
@@ -980,7 +1116,7 @@ export default function ProductDetail() {
                         <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                         <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-amber-400 rounded-full"
+                            className="h-full bg-amber-400 rounded-full transition-all"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -995,20 +1131,22 @@ export default function ProductDetail() {
 
               {/* Reviews list */}
               <div className="space-y-6">
-                {product.reviews.length === 0 ? (
+                {realRatings.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Star className="w-10 h-10 mx-auto mb-2 text-muted-foreground/30" />
                     <p>Chưa có đánh giá nào.</p>
                   </div>
                 ) : (
-                  product.reviews.map((r: any) => (
+                  realRatings.map((r: any) => (
                     <div
                       key={r.id}
                       className="pb-5 border-b border-border/40 last:border-0"
                     >
                       <div className="flex items-center gap-3 mb-3">
                         <img
-                          src={r.userAvatar}
+                          src={
+                            r.userAvatar || "https://i.pravatar.cc/150?img=12"
+                          }
                           className="w-10 h-10 rounded-full object-cover border border-border"
                           alt={r.userName}
                         />
@@ -1017,17 +1155,13 @@ export default function ProductDetail() {
                           <div className="flex items-center gap-2 mt-0.5">
                             <StarRow rating={r.rating} size={13} />
                             <span className="text-xs text-muted-foreground">
-                              {new Date(r.createdAt).toLocaleDateString(
-                                "vi-VN",
-                              )}
+                              {new Date(
+                                r.createdAt || new Date(),
+                              ).toLocaleDateString("vi-VN")}
                             </span>
                           </div>
                         </div>
                       </div>
-                      {/* Review media above, comment below */}
-                      <ReviewMedia
-                        images={REVIEW_IMAGES.slice(0, r.rating > 4 ? 2 : 0)}
-                      />
                       <p className="text-muted-foreground text-sm leading-relaxed mt-2">
                         {r.comment}
                       </p>
