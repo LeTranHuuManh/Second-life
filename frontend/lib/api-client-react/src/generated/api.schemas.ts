@@ -8,3 +8,52 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ConversationDTO {
+  id?: number;
+  productId?: number;
+  productTitle?: string;
+  partnerId?: number;
+  partnerName?: string;
+  lastMessage?: string;
+  lastMessageAt?: string;
+  unreadCount?: number;
+}
+
+export interface PageConversationDTO {
+  content?: ConversationDTO[];
+  totalElements?: number;
+  totalPages?: number;
+}
+
+export interface MessageDTO {
+  id?: number;
+  conversationId?: number;
+  senderId?: number;
+  content?: string;
+  createdAt?: string;
+  isRead?: boolean;
+}
+
+export interface PageMessageDTO {
+  content?: MessageDTO[];
+  totalElements?: number;
+  totalPages?: number;
+}
+
+export interface SendMessageRequest {
+  conversationId?: number;
+  productId?: number;
+  recipientId?: number;
+  content?: string;
+}
+
+export type GetConversationsParams = {
+  page?: number;
+  size?: number;
+};
+
+export type GetMessagesParams = {
+  page?: number;
+  size?: number;
+};

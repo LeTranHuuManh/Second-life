@@ -57,6 +57,7 @@ public class SecurityConfig {
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
                     .requestMatchers("/api/auth/login", "/api/auth/register", "/api/categories").permitAll()
                     .requestMatchers("/health", "/info").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
                     .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

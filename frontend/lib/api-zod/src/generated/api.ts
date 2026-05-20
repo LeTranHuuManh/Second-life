@@ -8,6 +8,81 @@
 import * as zod from "zod";
 
 /**
+ * @summary Get user conversations
+ */
+export const GetConversationsQueryParams = zod.object({
+  page: zod.coerce.number().optional(),
+  size: zod.coerce.number().optional(),
+});
+
+export const GetConversationsResponse = zod.object({
+  content: zod
+    .array(
+      zod.object({
+        id: zod.number().optional(),
+        productId: zod.number().optional(),
+        productTitle: zod.string().optional(),
+        partnerId: zod.number().optional(),
+        partnerName: zod.string().optional(),
+        lastMessage: zod.string().optional(),
+        lastMessageAt: zod.coerce.date().optional(),
+        unreadCount: zod.number().optional(),
+      }),
+    )
+    .optional(),
+  totalElements: zod.number().optional(),
+  totalPages: zod.number().optional(),
+});
+
+/**
+ * @summary Get messages for a conversation
+ */
+export const GetMessagesParams = zod.object({
+  conversationId: zod.coerce.number(),
+});
+
+export const GetMessagesQueryParams = zod.object({
+  page: zod.coerce.number().optional(),
+  size: zod.coerce.number().optional(),
+});
+
+export const GetMessagesResponse = zod.object({
+  content: zod
+    .array(
+      zod.object({
+        id: zod.number().optional(),
+        conversationId: zod.number().optional(),
+        senderId: zod.number().optional(),
+        content: zod.string().optional(),
+        createdAt: zod.coerce.date().optional(),
+        isRead: zod.boolean().optional(),
+      }),
+    )
+    .optional(),
+  totalElements: zod.number().optional(),
+  totalPages: zod.number().optional(),
+});
+
+/**
+ * @summary Send a message
+ */
+export const SendMessageBody = zod.object({
+  conversationId: zod.number().optional(),
+  productId: zod.number().optional(),
+  recipientId: zod.number().optional(),
+  content: zod.string().optional(),
+});
+
+export const SendMessageResponse = zod.object({
+  id: zod.number().optional(),
+  conversationId: zod.number().optional(),
+  senderId: zod.number().optional(),
+  content: zod.string().optional(),
+  createdAt: zod.coerce.date().optional(),
+  isRead: zod.boolean().optional(),
+});
+
+/**
  * Returns server health status
  * @summary Health check
  */

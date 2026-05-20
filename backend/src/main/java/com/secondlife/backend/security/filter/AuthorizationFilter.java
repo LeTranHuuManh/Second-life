@@ -19,6 +19,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     private static final String[] PUBLIC_URLS = {
             "/api/auth/login",
             "/api/auth/register",
+            "/api/products",
+            "/api/categories",
+            "/ws",
             "/health",
             "/info"
     };
