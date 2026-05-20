@@ -67,8 +67,17 @@ export function useConfirmReceived() {
 export function useSubmitReview() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { orderId: number; rating: number; comment: string }) => {
-      return data;
+    mutationFn: async (data: { orderId: number; productId: number; rating: number; comment: string; imageUrl?: string }) => {
+      const payload = {
+        rating: data.rating,
+        comment: data.comment,
+        imageUrl: data.imageUrl,
+      };
+      const resp = await apiFetch(`/products/${data.productId}/ratings`, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      return resp.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });

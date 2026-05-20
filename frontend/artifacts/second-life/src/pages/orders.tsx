@@ -155,7 +155,12 @@ function ReviewModal({
   const handleSubmit = () => {
     if (rating === 0) return;
     submit(
-      { orderId: order.id, rating, comment },
+      { 
+        orderId: order.id, 
+        productId: order.items[0]?.productId,
+        rating, 
+        comment 
+      },
       {
         onSuccess: () => {
           onClose();
