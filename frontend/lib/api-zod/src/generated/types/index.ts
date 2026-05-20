@@ -6,4 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./conversationDTO";
+export * from "./getConversationsParams";
+export * from "./getMessagesParams";
 export * from "./healthStatus";
+export * from "./messageDTO";
+export * from "./pageConversationDTO";
+export * from "./pageMessageDTO";
+export * from "./sendMessageRequest";

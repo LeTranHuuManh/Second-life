@@ -10,7 +10,78 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: chat
+    description: Chat operations
 paths:
+  /v1/chat/conversations:
+    get:
+      operationId: getConversations
+      tags: [chat]
+      summary: Get user conversations
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageConversationDTO"
+  /v1/chat/conversations/{conversationId}/messages:
+    get:
+      operationId: getMessages
+      tags: [chat]
+      summary: Get messages for a conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageMessageDTO"
+  /v1/chat/send:
+    post:
+      operationId: sendMessage
+      tags: [chat]
+      summary: Send a message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "200":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageDTO"
   /healthz:
     get:
       operationId: healthCheck
@@ -34,3 +105,76 @@ components:
       required:
         - status
 
+    ConversationDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productTitle:
+          type: string
+        partnerId:
+          type: integer
+        partnerName:
+          type: string
+        lastMessage:
+          type: string
+        lastMessageAt:
+          type: string
+          format: date-time
+        unreadCount:
+          type: integer
+
+    PageConversationDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationDTO"
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    MessageDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        senderId:
+          type: integer
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        isRead:
+          type: boolean
+
+    PageMessageDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageDTO"
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    SendMessageRequest:
+      type: object
+      properties:
+        conversationId:
+          type: integer
+        productId:
+          type: integer
+        recipientId:
+          type: integer
+        content:
+          type: string

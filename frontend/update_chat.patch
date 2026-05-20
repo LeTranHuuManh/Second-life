@@ -1,0 +1,17 @@
+--- backend/src/main/java/com/secondlife/backend/service/ChatService.java
++++ backend/src/main/java/com/secondlife/backend/service/ChatService.java
+@@ -139,8 +139,12 @@
+         UserAccount partner = conv.getBuyer().getId().equals(currentUserId) ? conv.getSeller() : conv.getBuyer();
+         dto.setPartnerId(partner.getId());
+-        // For simplicity now: you can expand to real names / profiles later
+-        dto.setPartnerName("User " + partner.getId()); 
++        
++        if (partner.getSellerProfile() != null && partner.getSellerProfile().getShopName() != null) {
++            dto.setPartnerName(partner.getSellerProfile().getShopName());
++        } else if (partner.getProfile() != null && partner.getProfile().getFullName() != null) {
++            dto.setPartnerName(partner.getProfile().getFullName());
++        } else {
++            dto.setPartnerName("User " + partner.getId());
++        }
+ 
+         if (!conv.getMessages().isEmpty()) {

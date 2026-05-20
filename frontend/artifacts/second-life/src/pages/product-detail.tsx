@@ -1009,7 +1009,10 @@ export default function ProductDetail() {
                 </div>
               </div>
               <div className="flex gap-3 mt-4 pt-4 border-t border-border/60">
-                <Link href="/tin-nhan" className="flex-1">
+                <Link
+                  href={`/tin-nhan?productId=${product.id}&recipientId=${product.shop.id}&productTitle=${encodeURIComponent(product.name)}&partnerName=${encodeURIComponent(product.shop.name)}`}
+                  className="flex-1"
+                >
                   <Button
                     variant="outline"
                     size="sm"
