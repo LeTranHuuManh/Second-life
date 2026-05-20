@@ -26,4 +26,11 @@ public class AdminUserController {
         Page<UserAdminResponse> page = adminUserService.getAllUsers(pageable);
         return ResponseEntity.ok(BaseResponse.success("Lấy danh sách người dùng thành công", page));
     }
+
+    @PutMapping("/{id}/toggle-status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BaseResponse<Void>> toggleUserStatus(@PathVariable Long id) {
+        adminUserService.toggleUserStatus(id);
+        return ResponseEntity.ok(BaseResponse.success("Cập nhật trạng thái người dùng thành công", null));
+    }
 }

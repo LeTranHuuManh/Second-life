@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api";
+import { useUsers, useToggleUserStatus } from "@/hooks/use-users";
 import {
   Table,
   TableBody,
@@ -25,10 +24,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function AdminUsers() {
   const [page, setPage] = useState(0);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["users", page],
-    queryFn: () => apiFetch(`/admin/users?page=${page}&size=20`),
-  });
+  const { data, isLoading } = useUsers(page);
+  const toggleUserStatusMutation = useToggleUserStatus();
+
+  const handleToggleStatus = (userId: number) => {
+    toggleUserStatusMutation.mutate(userId);
+  };
 
   const users = data?.data?.content || [];
   const totalPages = data?.data?.totalPages || 0;
@@ -118,11 +119,11 @@ export default function AdminUsers() {
                       <DropdownMenuItem>Lịch sử hoạt động</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {user.status === "banned" ? (
-                        <DropdownMenuItem className="text-green-600">
+                        <DropdownMenuItem className="text-green-600" onClick={() => handleToggleStatus(user.id)}>
                           <Unlock className="mr-2 h-4 w-4" /> Mở khóa tài khoản
                         </DropdownMenuItem>
                       ) : (
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem className="text-destructive" onClick={() => handleToggleStatus(user.id)}>
                           <Lock className="mr-2 h-4 w-4" /> Khóa tài khoản
                         </DropdownMenuItem>
                       )}
